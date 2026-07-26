@@ -8,9 +8,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Prepwise — AI Interview Coach",
+  title: "Offerly — AI Interview Coach",
   description:
-    "Practice role-specific interviews and turn every answer into a stronger story.",
+    "Practice better, build confidence, and get ready for your next offer.",
 };
 
 export default function RootLayout({

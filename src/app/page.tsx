@@ -42,11 +42,11 @@ export default function Home() {
   return (
     <main>
       <nav className="nav shell" aria-label="Main navigation">
-        <a className="brand" href="#" aria-label="Prepwise home">
+        <a className="brand" href="#" aria-label="Offerly home">
           <span className="brand-mark">
             <SparkIcon />
           </span>
-          prepwise
+          offerly
         </a>
         <div className="nav-actions">
           <a className="text-link" href="#how-it-works">

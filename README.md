@@ -1,6 +1,6 @@
 # AI Interview Coach
 
-AI Interview Coach (product name: **Prepwise**) is a web application for
+AI Interview Coach (product name: **Offerly**) is a web application for
 practicing role-specific interview questions and receiving actionable feedback.
 
 The project is being built in small, focused features. Each feature is documented
@@ -18,6 +18,17 @@ page that explains the product's core practice loop:
 This feature is intentionally static. Recording, authentication, AI feedback,
 and persistence will be added separately so each capability has a focused commit
 and can be understood in isolation.
+
+## Product identity
+
+- **Name:** Offerly
+- **Tagline:** Practice better. Get offer-ready.
+- **Purpose:** Help candidates turn deliberate interview practice into the
+  confidence and skills needed to earn an offer.
+
+The brand name and browser metadata live in `src/app/page.tsx` and
+`src/app/layout.tsx`. Keeping product copy separate from framework configuration
+makes future branding changes easy to locate.
 
 ## Tech stack
 
@@ -69,6 +80,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 ## Feature roadmap
 
 - [x] Application foundation and responsive landing page
+- [x] Offerly product identity
 - [ ] Interview setup form
 - [ ] Mock interview session
 - [ ] Answer recording and transcription

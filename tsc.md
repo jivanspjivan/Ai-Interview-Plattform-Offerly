@@ -8,11 +8,20 @@ answer follow-up questions instead of only memorizing implementation details.
 
 AI Interview Coach helps candidates practice realistic interview questions and
 improve through structured feedback. The product name shown in the interface is
-**Prepwise**.
+**Offerly**, reflecting the outcome users are working toward: becoming ready to
+earn an offer.
 
 The project currently contains its first feature: a responsive landing page
 built on a production-ready Next.js foundation. The landing page communicates
 the product idea and provides a stable base for later interactive features.
+
+The product identity is intentionally defined in two visible layers:
+
+- `layout.tsx` owns browser-facing metadata such as the title and description.
+- `page.tsx` owns the brand name rendered inside the page interface.
+
+Metadata belongs in the layout because Next.js can generate the document
+`<head>` from the exported `metadata` object without manually writing HTML tags.
 
 ## 2. Current architecture
 
