@@ -52,7 +52,7 @@ export default function Home() {
           <a className="text-link" href="#how-it-works">
             How it works
           </a>
-          <a className="button button-small button-dark" href="#get-started">
+          <a className="button button-small button-dark" href="/interview/new">
             Start practicing
             <ArrowIcon />
           </a>
@@ -76,7 +76,7 @@ export default function Home() {
             feedback you can use before the real interview begins.
           </p>
           <div className="hero-actions" id="get-started">
-            <a className="button button-primary" href="#how-it-works">
+            <a className="button button-primary" href="/interview/new">
               Start a practice session
               <ArrowIcon />
             </a>

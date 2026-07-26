@@ -6,7 +6,23 @@ practicing role-specific interview questions and receiving actionable feedback.
 The project is being built in small, focused features. Each feature is documented
 here so the repository history remains easy to follow and useful for learning.
 
-## Current feature: application foundation and landing page
+## Current features
+
+### Interview setup form
+
+The landing page call-to-action opens `/interview/new`, where a candidate can
+configure a practice session by choosing:
+
+- a target role;
+- behavioral, technical, or mixed interview questions;
+- an experience level;
+- a 15, 30, or 45-minute duration.
+
+The form validates the role, keeps the draft in React state, and displays a
+confirmation summary after submission. This version does not persist data or
+start a live interview; those responsibilities remain separate roadmap features.
+
+### Application foundation and landing page
 
 The first feature establishes the Next.js application and a responsive landing
 page that explains the product's core practice loop:
@@ -68,10 +84,16 @@ npm run type-check  # check TypeScript without generating files
 
 ```text
 src/
-└── app/
-    ├── globals.css   # design tokens, layout, and responsive styles
-    ├── layout.tsx    # shared HTML shell, font, and page metadata
-    └── page.tsx      # landing page route rendered at /
+├── app/
+│   ├── interview/new/
+│   │   ├── page.tsx          # server-rendered setup route
+│   │   └── setup.module.css  # route-specific layout styles
+│   ├── globals.css           # shared design tokens and landing styles
+│   ├── layout.tsx            # shared HTML shell, font, and metadata
+│   └── page.tsx              # landing page route rendered at /
+└── components/
+    ├── interview-setup-form.tsx
+    └── interview-setup-form.module.css
 ```
 
 For the code flow, architectural reasoning, and interview preparation notes, see
@@ -81,7 +103,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 
 - [x] Application foundation and responsive landing page
 - [x] Offerly product identity
-- [ ] Interview setup form
+- [x] Interview setup form
 - [ ] Mock interview session
 - [ ] Answer recording and transcription
 - [ ] AI-generated feedback

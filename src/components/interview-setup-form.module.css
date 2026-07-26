@@ -1,0 +1,336 @@
+.form,
+.confirmation {
+  border: 1px solid #dedfd8;
+  border-radius: 22px;
+  background: #fffdf8;
+  box-shadow: 0 28px 70px rgba(39, 56, 46, 0.11);
+}
+
+.form {
+  padding: clamp(28px, 5vw, 48px);
+}
+
+.formHeading {
+  padding-bottom: 32px;
+  border-bottom: 1px solid #e6e7e1;
+}
+
+.kicker {
+  margin: 0 0 10px;
+  color: #698047;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.formHeading h2,
+.confirmation h2 {
+  margin: 0;
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  letter-spacing: -0.05em;
+}
+
+.formHeading > p:last-child {
+  margin: 10px 0 0;
+  color: #7b847f;
+  font-size: 0.78rem;
+}
+
+.field {
+  display: grid;
+  gap: 9px;
+  margin-top: 28px;
+}
+
+.field label,
+.fieldset legend,
+.compactFieldset legend {
+  color: #354139;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 49px;
+  padding: 0 15px;
+  border: 1px solid #d4d7cf;
+  border-radius: 10px;
+  outline: none;
+  background: #faf9f4;
+  color: #17211d;
+  font: inherit;
+  font-size: 0.84rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #77983e;
+  box-shadow: 0 0 0 3px rgba(200, 242, 105, 0.32);
+}
+
+.field > span {
+  color: #929993;
+  font-size: 0.65rem;
+}
+
+.fieldset,
+.compactFieldset {
+  min-width: 0;
+  margin: 29px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 11px;
+}
+
+.optionCard {
+  min-height: 126px;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  padding: 16px 14px;
+  border: 1px solid #d9dbd4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.optionCard input,
+.segmentedControl input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.radioMark {
+  width: 16px;
+  height: 16px;
+  margin-bottom: 17px;
+  border: 1px solid #bdc1ba;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px #fffdf8;
+}
+
+.optionCard strong {
+  font-size: 0.76rem;
+}
+
+.optionCard small {
+  margin-top: 5px;
+  color: #858e88;
+  font-size: 0.61rem;
+  line-height: 1.45;
+}
+
+.selectedCard {
+  border-color: #8cad4e;
+  background: #f5f9eb;
+}
+
+.selectedCard .radioMark {
+  border-color: #759537;
+  background: #759537;
+}
+
+.optionCard:focus-within {
+  box-shadow: 0 0 0 3px rgba(200, 242, 105, 0.4);
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: 1fr 1.16fr;
+  gap: 18px;
+}
+
+.segmentedControl {
+  height: 49px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 9px;
+  padding: 4px;
+  border: 1px solid #d4d7cf;
+  border-radius: 10px;
+  background: #f1f1eb;
+}
+
+.segmentedControl label {
+  position: relative;
+  cursor: pointer;
+}
+
+.segmentedControl span {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  color: #7a837d;
+  font-size: 0.67rem;
+  font-weight: 750;
+}
+
+.segmentedControl input:checked + span {
+  background: #fffdf8;
+  color: #243129;
+  box-shadow: 0 2px 7px rgba(35, 48, 40, 0.09);
+}
+
+.segmentedControl input:focus-visible + span {
+  outline: 2px solid #789d34;
+  outline-offset: 1px;
+}
+
+.submitButton,
+.secondaryButton {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.79rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.submitButton {
+  height: 53px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 35px;
+  background: #c8f269;
+  color: #17211d;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.submitButton:hover {
+  background: #b8e853;
+  transform: translateY(-1px);
+}
+
+.submitButton span {
+  font-size: 1.15rem;
+}
+
+.privacyNote {
+  margin: 12px 0 0;
+  color: #959c97;
+  font-size: 0.62rem;
+  text-align: center;
+}
+
+.confirmation {
+  padding: clamp(38px, 6vw, 62px);
+}
+
+.confirmationIcon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 30px;
+  border-radius: 50%;
+  background: #c8f269;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.confirmationCopy {
+  margin: 17px 0 32px;
+  color: #6d7771;
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid #e1e2dc;
+  border-radius: 12px;
+  background: #e1e2dc;
+}
+
+.summary div {
+  min-width: 0;
+  padding: 17px 14px;
+  background: #faf9f4;
+}
+
+.summary dt {
+  margin-bottom: 7px;
+  color: #959c97;
+  font-size: 0.59rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.summary dd {
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notice {
+  margin: 23px 0;
+  padding: 13px 15px;
+  border-radius: 9px;
+  background: #f0f4e7;
+  color: #677454;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.secondaryButton {
+  height: 49px;
+  border: 1px solid #d6d9d1;
+  background: transparent;
+  color: #344239;
+}
+
+@media (max-width: 560px) {
+  .typeGrid,
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .optionCard {
+    min-height: 104px;
+  }
+
+  .radioMark {
+    margin-bottom: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field input,
+  .field select,
+  .optionCard,
+  .submitButton {
+    transition: none;
+  }
+}

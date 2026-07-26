@@ -23,6 +23,10 @@ The product identity is intentionally defined in two visible layers:
 Metadata belongs in the layout because Next.js can generate the document
 `<head>` from the exported `metadata` object without manually writing HTML tags.
 
+The second feature adds an interview setup route. It demonstrates how an App
+Router page can stay server-rendered while delegating only its interactive form
+to a Client Component.
+
 ## 2. Current architecture
 
 The application uses the Next.js **App Router**, where folders and files inside
@@ -53,6 +57,21 @@ src/app/globals.css
 event handlers. Next.js renders its HTML on the server and sends it to the
 browser.
 
+The `/interview/new` route has a deliberate server/client split:
+
+```text
+src/app/interview/new/page.tsx        Server Component
+  - exports route-specific metadata
+  - renders navigation and explanatory content
+  - imports the interactive form
+                    |
+                    v
+src/components/interview-setup-form.tsx  Client Component
+  - stores form selections with useState
+  - handles input changes and submission
+  - renders the submitted practice-plan summary
+```
+
 ## 3. Request flow
 
 When a visitor opens `/`:
@@ -65,6 +84,19 @@ When a visitor opens `/`:
 
 There is no database or external API in this flow yet. Those boundaries will be
 introduced and documented when their features are implemented.
+
+When a visitor configures an interview:
+
+1. The `/interview/new` Server Component supplies the initial route HTML.
+2. The form hydrates in the browser because it begins with `"use client"`.
+3. Controlled inputs read values from the `setup` state object.
+4. `updateSetup` creates a new state object with the changed field.
+5. Submission prevents a browser page reload and copies the draft into
+   `submittedSetup`.
+6. React rerenders the component as a confirmation summary.
+
+The values disappear after a refresh because there is no persistence yet. This
+is an intentional feature boundary rather than an implementation oversight.
 
 ## 4. Important implementation decisions
 
@@ -100,6 +132,31 @@ The three process cards share the same shape. Storing their content as data and
 mapping it into markup avoids duplicated structure and makes additions less
 error-prone. In a larger application, the data may come from a CMS or API.
 
+### Why split the setup page and form?
+
+Only the form needs browser state and event handlers. Keeping the surrounding
+page as a Server Component minimizes the client boundary and makes it possible
+to add server-side data loading later without converting the whole route.
+
+### Why use controlled form inputs?
+
+Each input receives its value from React state and updates that state in
+`onChange`. This provides one reliable representation of the practice plan and
+makes conditional UI, validation, and a future API request straightforward.
+
+### What does the generic `updateSetup` function do?
+
+`Key extends keyof SetupState` limits the first argument to real state keys.
+`SetupState[Key]` then requires the matching value type. For example, `duration`
+must receive a number, while `role` must receive a string. It removes repetitive
+handlers without sacrificing type safety.
+
+### Why use CSS Modules for the new route?
+
+CSS Modules scope generated class names to a component. The original landing
+page still uses global styles as a simple foundation, while feature-specific
+styles use modules to prevent naming collisions as the application grows.
+
 ## 5. TypeScript concepts used
 
 - `Metadata` is imported as a type and validates Next.js page metadata.
@@ -108,6 +165,10 @@ error-prone. In a larger application, the data may come from a CMS or API.
 - Strict mode is enabled in `tsconfig.json`, so unsafe implicit types are caught
   during development.
 - The `@/*` alias points to `src/*` and will keep future imports readable.
+- `SetupState` defines the complete form data contract.
+- `as const` preserves literal interview type values such as `"behavioral"`
+  instead of widening them to the general `string` type.
+- `FormEvent<HTMLFormElement>` gives the submit handler an accurate event type.
 
 Note that `tsc.md` means **Technical Study Companion**. The actual TypeScript
 compiler configuration is `tsconfig.json`.
@@ -175,6 +236,20 @@ Add automated tests, analytics with user consent, a complete footer and legal
 pages, real call-to-action destinations, security headers, and monitoring. The
 static copy should also be validated with real users before optimizing it.
 
+### Why does refreshing the setup confirmation lose its data?
+
+The current feature stores data only in component memory. React state resets
+when the page reloads. Persistence could use URL search parameters, browser
+storage, or a database. A database is the likely final choice because interview
+sessions should follow authenticated users across devices.
+
+### Why not put `"use client"` on the route page?
+
+That would work, but it would make the entire route part of the client boundary.
+By isolating the directive in the form, static navigation and explanatory
+content remain server-rendered and the architecture communicates which code
+actually depends on the browser.
+
 ## 9. Learning checklist
 
 Before moving to the next feature, you should be able to explain:
@@ -184,3 +259,8 @@ Before moving to the next feature, you should be able to explain:
 - how strict TypeScript and ESLint catch different classes of problems;
 - how CSS Grid and media queries create the responsive layout;
 - which parts of the current UI are demonstrations rather than live AI results.
+- how `/interview/new` maps to its `page.tsx` file;
+- why the setup form is a Client Component but its route remains a Server
+  Component;
+- how controlled inputs and generic state updates work;
+- why submitted setup data is currently temporary.
