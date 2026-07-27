@@ -21,13 +21,69 @@ export default function LoginPage() {
         </Link>
       </nav>
       <div className={styles.content}>
-        <section className={styles.intro}>
+        <section className={`${styles.intro} ${styles.loginIntro}`}>
           <p>Your private practice space</p>
           <h2>Pick up where you left off.</h2>
           <span>
             Return to your answers, coaching feedback, and progress whenever
             you are ready to practice again.
           </span>
+          <div className={styles.interviewVisual} aria-hidden="true">
+            <div className={styles.mockBrowser}>
+              <div className={styles.mockBrowserBar}>
+                <span />
+                <span />
+                <span />
+                <small>Live interview</small>
+                <time>08:42</time>
+              </div>
+              <div className={styles.mockQuestion}>
+                <div className={styles.mockParticipants}>
+                  <div>
+                    <span>AI</span>
+                    <small>Offerly coach</small>
+                  </div>
+                  <div>
+                    <small>You</small>
+                    <span>AM</span>
+                  </div>
+                </div>
+                <div className={styles.mockProgress}>
+                  <span />
+                </div>
+                <small>Question 04 of 08</small>
+                <strong>Tell me about a difficult decision.</strong>
+                <div className={styles.mockWaveform}>
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className={styles.mockTranscript}>
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            </div>
+            <div className={`${styles.floatingMetric} ${styles.scoreMetric}`}>
+              <span>AI score</span>
+              <strong>92</strong>
+            </div>
+            <div
+              className={`${styles.floatingMetric} ${styles.confidenceMetric}`}
+            >
+              <span>Confidence</span>
+              <strong>High</strong>
+            </div>
+            <div className={`${styles.floatingMetric} ${styles.resumeMetric}`}>
+              <span>Resume match</span>
+              <strong>87%</strong>
+            </div>
+          </div>
           <ul className={styles.benefits}>
             <li>Keep interview sessions private</li>
             <li>Review transcripts and feedback</li>
@@ -35,19 +91,19 @@ export default function LoginPage() {
           </ul>
           <div
             className={styles.trustLine}
-            aria-label="Illustrative Offerly practice metrics"
+            aria-label="Offerly product metrics"
           >
             <div>
-              <strong>5,000+</strong>
-              <span>sample practice metric</span>
+              <strong>10+</strong>
+              <span>Role tracks</span>
             </div>
             <div>
-              <strong>Student-focused</strong>
-              <span>practice experience</span>
+              <strong>4</strong>
+              <span>Feedback dimensions</span>
             </div>
             <div>
-              <strong>34%</strong>
-              <span>illustrative score lift</span>
+              <strong>3</strong>
+              <span>Interview formats</span>
             </div>
           </div>
         </section>

@@ -20,7 +20,12 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form
+      className={`${styles.form} ${
+        isRegister ? styles.registerForm : styles.loginForm
+      }`}
+      onSubmit={handleSubmit}
+    >
       <div className={styles.heading}>
         <p>{isRegister ? "Start practicing" : "Welcome back"}</p>
         <h1>{isRegister ? "Create your Offerly account" : "Log in to Offerly"}</h1>
@@ -88,7 +93,8 @@ export function AuthForm({ mode }: AuthFormProps) {
         <label className={styles.consent}>
           <input type="checkbox" required />
           <span>
-            I agree to the Terms of Service and Privacy Policy.
+            I agree to the <Link href="/terms">Terms of Service</Link> and{" "}
+            <Link href="/privacy">Privacy Policy</Link>.
           </span>
         </label>
       )}

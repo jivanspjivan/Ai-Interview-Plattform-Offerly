@@ -1,12 +1,12 @@
 .form {
   width: min(470px, 100%);
-  padding: clamp(28px, 5vw, 48px);
+  padding: clamp(25px, 4.5vw, 43px);
   border: 1px solid #d8d8d0;
   border-radius: 24px;
   background: #fffefa;
   box-shadow:
-    0 26px 68px rgba(34, 43, 38, 0.12),
-    0 2px 8px rgba(34, 43, 38, 0.04);
+    0 28px 72px rgba(34, 43, 38, 0.14),
+    0 3px 10px rgba(34, 43, 38, 0.05);
   transition: all 0.25s ease;
   animation: form-enter 500ms ease 150ms both;
 }
@@ -19,10 +19,29 @@
   transform: translateY(-3px);
 }
 
+.loginForm {
+  width: min(447px, 100%);
+  padding-top: clamp(19px, 3.2vw, 31px);
+}
+
+.registerForm .heading h1 {
+  font-size: clamp(1.58rem, 3.3vw, 2rem);
+}
+
+.registerForm {
+  width: min(463px, 100%);
+  padding-top: clamp(27px, 3.8vw, 36px);
+  padding-bottom: 24px;
+}
+
+.registerForm .heading > span {
+  color: #56615b;
+}
+
 .heading > p {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: #698047;
-  font-size: 0.66rem;
+  font-size: 0.61rem;
   font-weight: 850;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -30,7 +49,7 @@
 
 .heading h1 {
   margin: 0;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-size: clamp(1.72rem, 3.7vw, 2.3rem);
   font-weight: 620;
   letter-spacing: -0.055em;
 }
@@ -43,6 +62,10 @@
   line-height: 1.6;
 }
 
+.loginForm .heading > span {
+  color: #656f69;
+}
+
 .googleButton {
   width: 100%;
   height: 52px;
@@ -51,7 +74,7 @@
   justify-content: center;
   gap: 11px;
   border: 1px solid #d5d8d0;
-  border-radius: 9999px;
+  border-radius: 16px;
   background: #fffefa;
   color: #39463e;
   font: inherit;
@@ -62,46 +85,73 @@
     background 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transform 220ms ease;
 }
 
 .googleButton:hover {
-  border-color: #cfd3c8;
-  background: #f8f8f8;
+  border-color: #9fa59d;
+  background: #f4f4f4;
   box-shadow: 0 8px 20px rgba(29, 38, 33, 0.09);
   transform: translateY(-2px);
 }
 
 .googleButton > span {
-  width: 27px;
-  height: 27px;
+  width: 35px;
+  height: 35px;
   display: grid;
   place-items: center;
   border-radius: 50%;
+  border: 1px solid #ecece8;
   background: #fff;
   color: #56724a;
-  font-size: 0.88rem;
+  font-size: 1.05rem;
   font-weight: 900;
+  transition: transform 220ms ease;
+}
+
+.loginForm .googleButton:hover,
+.registerForm .googleButton:hover {
+  border-color: #b6bbb4;
+  background: #f7f7f7;
+  transform: translateY(-2px);
+}
+
+.loginForm .googleButton:hover > span,
+.registerForm .googleButton:hover > span {
+  transform: scale(1.06);
 }
 
 .divider {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 32px 0;
-  color: #a1a7a2;
+  margin: 22px 0;
+  color: #747d77;
   font-size: 0.58rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.4;
+  opacity: 0.82;
 }
 
 .divider::before,
 .divider::after {
   height: 1px;
   flex: 1;
-  background: #e8e9e4;
+  background: #d6d9d3;
   content: "";
+}
+
+.loginForm .divider,
+.registerForm .divider {
+  color: #46524b;
+  opacity: 0.9;
+}
+
+.loginForm .divider::before,
+.loginForm .divider::after,
+.registerForm .divider::before,
+.registerForm .divider::after {
+  background: #aeb5ac;
 }
 
 .field {
@@ -131,7 +181,7 @@
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #abb0aa;
   border-radius: 16px;
   outline: none;
   background: #fcfbf7;
@@ -151,7 +201,7 @@
   border-color: #17211d;
   background: #fffdf8;
   box-shadow:
-    0 0 0 4px rgba(23, 33, 29, 0.1),
+    0 0 0 4px rgba(23, 33, 29, 0.12),
     0 5px 15px rgba(23, 33, 29, 0.06);
 }
 
@@ -165,7 +215,7 @@
   position: relative;
   border: 0;
   background: transparent;
-  color: #70864f;
+  color: #536159;
   font: inherit;
   font-size: 0.62rem;
   cursor: pointer;
@@ -185,7 +235,7 @@
 }
 
 .labelRow button:hover {
-  color: #8aa05a;
+  color: #6f8449;
 }
 
 .labelRow button:hover::after {
@@ -194,17 +244,62 @@
 
 .consent {
   display: grid;
-  grid-template-columns: 16px 1fr;
-  gap: 9px;
+  grid-template-columns: 18px 1fr;
+  gap: 11px;
   margin-top: 18px;
-  color: #737d77;
-  font-size: 0.61rem;
+  color: #555f59;
+  font-size: 0.67rem;
   line-height: 1.5;
 }
 
+.registerForm .consent {
+  margin-top: 20px;
+}
+
+.registerForm .field {
+  margin-top: 18px;
+}
+
 .consent input {
-  margin: 2px 0 0;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
   accent-color: #7d9e3c;
+}
+
+.consent a {
+  position: relative;
+  color: #35483d;
+  font-weight: 700;
+  transition: color 200ms ease;
+}
+
+.consent a::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 200ms ease;
+}
+
+.consent a:hover {
+  color: #6f8449;
+}
+
+.consent a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.consent a:focus-visible {
+  outline: 2px solid #789d34;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .submitButton {
@@ -226,9 +321,13 @@
   transition: 0.2s ease;
 }
 
+.registerForm .submitButton {
+  margin-top: 38px;
+}
+
 .submitButton:hover {
   background: #232e29;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px) scale(1.02);
 }
 
@@ -241,7 +340,7 @@
 }
 
 .submitButton:hover > span {
-  transform: translateX(4px);
+  transform: translateX(5px);
 }
 
 .submitButton:focus-visible,
@@ -262,16 +361,16 @@
 }
 
 .switchMode {
-  margin: 21px 0 0;
-  color: #7a837e;
+  margin: 14px 0 0;
+  color: #929a95;
   font-size: 0.68rem;
   text-align: center;
 }
 
 .switchMode a {
   position: relative;
-  color: #4e6538;
-  font-weight: 850;
+  color: #2f3e35;
+  font-weight: 650;
   transition: color 200ms ease;
 }
 
@@ -288,7 +387,7 @@
 }
 
 .switchMode a:hover {
-  color: #8aa05a;
+  color: #6f8449;
 }
 
 .switchMode a:hover::after {
@@ -330,12 +429,15 @@
   }
 
   .googleButton,
+  .googleButton > span,
   .field input,
   .labelRow button,
   .labelRow button::after,
   .submitButton,
   .switchMode a,
-  .switchMode a::after {
+  .switchMode a::after,
+  .consent a,
+  .consent a::after {
     transition: none;
   }
 }
