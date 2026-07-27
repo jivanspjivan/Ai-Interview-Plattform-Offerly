@@ -23,7 +23,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "₹179",
+    price: "₹199",
     suffix: "/ month",
     description: "Prepare seriously for an active job search.",
     features: [
@@ -39,7 +39,7 @@ const plans = [
   },
   {
     name: "Premium Plus",
-    price: "₹379",
+    price: "₹399",
     suffix: "/ month",
     description: "Get the deepest preparation for high-stakes interviews.",
     features: [
