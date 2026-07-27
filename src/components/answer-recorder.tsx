@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { InterviewFeedback } from "@/types/interview-feedback";
 import styles from "./answer-recorder.module.css";
 
 type AnswerRecorderProps = {
@@ -8,10 +9,15 @@ type AnswerRecorderProps = {
     blob: Blob;
     url: string;
     transcript?: string;
+    feedback?: InterviewFeedback;
   };
+  question: string;
+  role: string;
+  experience: string;
   onAudioChange: (audio: Blob | undefined) => void;
   onRecordingChange: (isRecording: boolean) => void;
   onTranscriptChange: (transcript: string) => void;
+  onFeedbackChange: (feedback: InterviewFeedback) => void;
 };
 
 type RecorderStatus = "idle" | "requesting" | "recording" | "error";
@@ -29,9 +35,13 @@ function getSupportedMimeType() {
 
 export function AnswerRecorder({
   audio,
+  question,
+  role,
+  experience,
   onAudioChange,
   onRecordingChange,
   onTranscriptChange,
+  onFeedbackChange,
 }: AnswerRecorderProps) {
   const [status, setStatus] = useState<RecorderStatus>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -40,6 +50,10 @@ export function AnswerRecorder({
     "idle" | "loading" | "error"
   >("idle");
   const [transcriptionError, setTranscriptionError] = useState("");
+  const [feedbackStatus, setFeedbackStatus] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+  const [feedbackError, setFeedbackError] = useState("");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -171,6 +185,44 @@ export function AnswerRecorder({
     }
   }
 
+  async function generateFeedback() {
+    if (!audio?.transcript) return;
+
+    setFeedbackStatus("loading");
+    setFeedbackError("");
+
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role,
+          experience,
+          question,
+          transcript: audio.transcript,
+        }),
+      });
+      const result = (await response.json()) as {
+        feedback?: InterviewFeedback;
+        error?: string;
+      };
+
+      if (!response.ok || !result.feedback) {
+        throw new Error(result.error || "Feedback generation failed.");
+      }
+
+      onFeedbackChange(result.feedback);
+      setFeedbackStatus("idle");
+    } catch (error) {
+      setFeedbackStatus("error");
+      setFeedbackError(
+        error instanceof Error
+          ? error.message
+          : "Feedback could not be generated.",
+      );
+    }
+  }
+
   if (status === "recording") {
     return (
       <section className={styles.recorder} aria-live="polite">
@@ -244,6 +296,66 @@ export function AnswerRecorder({
             <strong>Transcript</strong>
             <p>{audio.transcript}</p>
           </div>
+        )}
+        {audio.transcript && (
+          <button
+            className={styles.feedbackButton}
+            type="button"
+            disabled={feedbackStatus === "loading"}
+            onClick={generateFeedback}
+          >
+            {feedbackStatus === "loading"
+              ? "Reviewing answer…"
+              : audio.feedback
+                ? "Refresh AI feedback"
+                : "Get AI feedback"}
+          </button>
+        )}
+        {feedbackStatus === "error" && (
+          <p className={styles.error} role="alert">
+            {feedbackError}
+          </p>
+        )}
+        {audio.feedback && (
+          <section className={styles.feedback} aria-label="AI answer feedback">
+            <header className={styles.feedbackHeader}>
+              <div>
+                <span>Answer score</span>
+                <strong>{audio.feedback.overallScore}</strong>
+              </div>
+              <p>{audio.feedback.summary}</p>
+            </header>
+            <div className={styles.scoreGrid}>
+              {Object.entries(audio.feedback.scores).map(([label, score]) => (
+                <div key={label}>
+                  <span>{label}</span>
+                  <strong>{score}</strong>
+                </div>
+              ))}
+            </div>
+            <div className={styles.feedbackColumns}>
+              <div>
+                <strong>What worked</strong>
+                <ul>
+                  {audio.feedback.strengths.map((strength) => (
+                    <li key={strength}>{strength}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>Improve next</strong>
+                <ul>
+                  {audio.feedback.improvements.map((improvement) => (
+                    <li key={improvement}>{improvement}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className={styles.nextStep}>
+              <strong>Try this next</strong>
+              <p>{audio.feedback.nextStep}</p>
+            </div>
+          </section>
         )}
       </section>
     );

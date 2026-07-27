@@ -8,6 +8,14 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### AI interview feedback
+
+Candidates can request structured coaching after transcribing an answer. A
+server-side `/api/feedback` route evaluates the role, level, question, and
+answer with OpenAI while keeping credentials private. It returns schema-checked
+scores for structure, relevance, clarity, and evidence, plus strengths,
+improvements, and one concrete next action.
+
 ### Answer transcription
 
 Recorded answers can be sent to the server-side `/api/transcribe` route and
@@ -135,7 +143,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Mock interview session
 - [x] Answer recording
 - [x] Answer transcription
-- [ ] AI-generated feedback
+- [x] AI-generated feedback
 - [ ] Session history and progress tracking
 
 ## Branch strategy

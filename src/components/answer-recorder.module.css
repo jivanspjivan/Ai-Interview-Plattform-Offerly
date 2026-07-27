@@ -167,6 +167,128 @@
   line-height: 1.65;
 }
 
+.feedbackButton {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: #c8f269;
+  color: #17211d;
+  font: inherit;
+  font-size: 0.71rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.feedbackButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.feedback {
+  display: grid;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #dfe2da;
+}
+
+.feedbackHeader {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 18px;
+}
+
+.feedbackHeader > div {
+  display: grid;
+  place-items: center;
+  padding: 11px;
+  border-radius: 12px;
+  background: #17211d;
+  color: #fff;
+}
+
+.feedbackHeader span {
+  color: #b9c2bc;
+  font-size: 0.53rem;
+  text-transform: uppercase;
+}
+
+.feedbackHeader strong {
+  color: #c8f269;
+  font-size: 1.8rem;
+}
+
+.feedbackHeader p {
+  margin: 0;
+  color: #445149;
+  font-size: 0.73rem;
+  line-height: 1.6;
+}
+
+.scoreGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.scoreGrid div {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  border-radius: 8px;
+  background: #fffdf8;
+}
+
+.scoreGrid span {
+  color: #7b857e;
+  font-size: 0.56rem;
+  text-transform: capitalize;
+}
+
+.scoreGrid strong {
+  font-size: 0.82rem;
+}
+
+.feedbackColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.feedbackColumns > div {
+  padding: 15px;
+  border-radius: 10px;
+  background: #fffdf8;
+}
+
+.feedbackColumns strong,
+.nextStep strong {
+  font-size: 0.67rem;
+}
+
+.feedbackColumns ul {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding-left: 17px;
+  color: #56635b;
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.nextStep {
+  padding: 14px 16px;
+  border-left: 3px solid #98bd4d;
+  background: #edf4df;
+}
+
+.nextStep p {
+  margin: 5px 0 0;
+  color: #56644d;
+  font-size: 0.69rem;
+  line-height: 1.55;
+}
+
 .error {
   margin: 0;
   padding: 11px 13px;
@@ -196,6 +318,19 @@
   .savedActions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .feedbackHeader,
+  .feedbackColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .feedbackHeader > div {
+    justify-self: start;
+  }
+
+  .scoreGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

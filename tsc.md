@@ -91,6 +91,12 @@ src/app/api/transcribe/route.ts           Server Route Handler
   - reads the OpenAI API key only on the server
   - forwards audio to the transcription API
   - returns transcript text or a safe error response
+                    |
+                    v
+src/app/api/feedback/route.ts             Server Route Handler
+  - validates role, question, level, and transcript
+  - requests schema-constrained coaching from OpenAI
+  - returns category scores and actionable feedback
 ```
 
 ## 3. Request flow
@@ -109,6 +115,12 @@ Answer transcription introduces the first external API boundary. The browser
 sends a multipart request to `/api/transcribe`; the Route Handler validates the
 file and calls OpenAI with `OPENAI_API_KEY`. The browser never receives that key.
 Recordings and transcripts are still temporary and are not stored in a database.
+
+The feedback route uses Structured Outputs with a strict JSON schema. This keeps
+the model response aligned with the UI contract: an overall score, four category
+scores, strengths, improvements, and a next step. Candidate transcript text is
+delimited and explicitly treated as untrusted content so it cannot redefine the
+server's coaching instructions.
 
 When a visitor configures an interview:
 

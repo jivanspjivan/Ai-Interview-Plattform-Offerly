@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AnswerRecorder } from "@/components/answer-recorder";
 import { getQuestions } from "@/data/interview-questions";
+import type { InterviewFeedback } from "@/types/interview-feedback";
 import type { InterviewSetup } from "@/types/interview";
 import styles from "./interview-session.module.css";
 
@@ -15,6 +16,7 @@ type AnswerRecording = {
   blob: Blob;
   url: string;
   transcript?: string;
+  feedback?: InterviewFeedback;
 };
 
 function formatTime(totalSeconds: number) {
@@ -135,6 +137,9 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
           <h1>{question.prompt}</h1>
           <AnswerRecorder
             audio={recordings[question.id]}
+            question={question.prompt}
+            role={setup.role}
+            experience={setup.experience}
             onAudioChange={(audio) =>
               setRecordings((current) => {
                 const next = { ...current };
@@ -159,6 +164,15 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
                 [question.id]: {
                   ...current[question.id],
                   transcript,
+                },
+              }))
+            }
+            onFeedbackChange={(feedback) =>
+              setRecordings((current) => ({
+                ...current,
+                [question.id]: {
+                  ...current[question.id],
+                  feedback,
                 },
               }))
             }
