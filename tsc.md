@@ -25,7 +25,9 @@ Metadata belongs in the layout because Next.js can generate the document
 
 The second feature adds an interview setup route. It demonstrates how an App
 Router page can stay server-rendered while delegating only its interactive form
-to a Client Component.
+to a Client Component. The mock interview feature completes that flow with a
+validated session route, local question bank, timer, progress, and completion
+summary.
 
 ## 2. Current architecture
 
@@ -69,7 +71,19 @@ src/app/interview/new/page.tsx        Server Component
 src/components/interview-setup-form.tsx  Client Component
   - stores form selections with useState
   - handles input changes and submission
-  - renders the submitted practice-plan summary
+  - encodes the practice plan as URL search parameters
+                    |
+                    v
+src/app/interview/session/page.tsx       Server Component
+  - reads and validates the search parameters
+  - redirects incomplete session links back to setup
+  - passes a typed plan to the interactive session
+                    |
+                    v
+src/components/interview-session.tsx     Client Component
+  - selects questions from the local question bank
+  - tracks question progress and elapsed time
+  - renders the completion summary
 ```
 
 ## 3. Request flow
@@ -91,12 +105,14 @@ When a visitor configures an interview:
 2. The form hydrates in the browser because it begins with `"use client"`.
 3. Controlled inputs read values from the `setup` state object.
 4. `updateSetup` creates a new state object with the changed field.
-5. Submission prevents a browser page reload and copies the draft into
-   `submittedSetup`.
-6. React rerenders the component as a confirmation summary.
+5. Submission prevents a browser page reload and navigates to the session route
+   with the setup encoded as search parameters.
+6. The session page validates every parameter before rendering the client-side
+   interview experience.
 
-The values disappear after a refresh because there is no persistence yet. This
-is an intentional feature boundary rather than an implementation oversight.
+The URL makes a configured session refreshable and shareable, but answers and
+progress still live only in browser memory. This is an intentional feature
+boundary rather than an implementation oversight.
 
 ## 4. Important implementation decisions
 
@@ -236,12 +252,12 @@ Add automated tests, analytics with user consent, a complete footer and legal
 pages, real call-to-action destinations, security headers, and monitoring. The
 static copy should also be validated with real users before optimizing it.
 
-### Why does refreshing the setup confirmation lose its data?
+### Why use search parameters for the practice plan?
 
-The current feature stores data only in component memory. React state resets
-when the page reloads. Persistence could use URL search parameters, browser
-storage, or a database. A database is the likely final choice because interview
-sessions should follow authenticated users across devices.
+Search parameters give the new route enough information to recreate a session
+after a refresh without adding a database prematurely. The server validates
+them because URL values are untrusted strings. A database remains the likely
+final choice once sessions need to follow authenticated users across devices.
 
 ### Why not put `"use client"` on the route page?
 
@@ -263,4 +279,5 @@ Before moving to the next feature, you should be able to explain:
 - why the setup form is a Client Component but its route remains a Server
   Component;
 - how controlled inputs and generic state updates work;
-- why submitted setup data is currently temporary.
+- why the session route validates its search parameters;
+- which session values survive a refresh and which remain temporary.

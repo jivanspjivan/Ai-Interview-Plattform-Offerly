@@ -8,6 +8,13 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### Mock interview session
+
+Submitting the interview setup now opens `/interview/session` with the selected
+role, format, level, and duration. The session presents locally defined
+questions one at a time, tracks progress and elapsed time, and ends with a
+completion summary. Invalid or incomplete session links return to setup.
+
 ### Interview setup form
 
 The landing page call-to-action opens `/interview/new`, where a candidate can
@@ -18,9 +25,10 @@ configure a practice session by choosing:
 - an experience level;
 - a 15, 30, or 45-minute duration.
 
-The form validates the role, keeps the draft in React state, and displays a
-confirmation summary after submission. This version does not persist data or
-start a live interview; those responsibilities remain separate roadmap features.
+The form validates the role, keeps the draft in React state, and passes the
+configuration to the mock interview route through URL search parameters. The
+role field offers up to four matches from a categorized local catalog while
+still accepting custom job titles.
 
 ### Application foundation and landing page
 
@@ -88,12 +96,16 @@ src/
 │   ├── interview/new/
 │   │   ├── page.tsx          # server-rendered setup route
 │   │   └── setup.module.css  # route-specific layout styles
+│   ├── interview/session/
+│   │   └── page.tsx          # validates setup and renders the session
 │   ├── globals.css           # shared design tokens and landing styles
 │   ├── layout.tsx            # shared HTML shell, font, and metadata
 │   └── page.tsx              # landing page route rendered at /
 └── components/
     ├── interview-setup-form.tsx
-    └── interview-setup-form.module.css
+    ├── interview-setup-form.module.css
+    ├── interview-session.tsx
+    └── interview-session.module.css
 ```
 
 For the code flow, architectural reasoning, and interview preparation notes, see
@@ -104,7 +116,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Application foundation and responsive landing page
 - [x] Offerly product identity
 - [x] Interview setup form
-- [ ] Mock interview session
+- [x] Mock interview session
 - [ ] Answer recording and transcription
 - [ ] AI-generated feedback
 - [ ] Session history and progress tracking

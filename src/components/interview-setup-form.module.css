@@ -79,6 +79,59 @@
   font-size: 0.65rem;
 }
 
+.roleInput {
+  position: relative;
+}
+
+.roleSuggestions {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 7px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid #d4d7cf;
+  border-radius: 11px;
+  background: #fffdf8;
+  box-shadow: 0 16px 35px rgba(39, 56, 46, 0.14);
+  list-style: none;
+}
+
+.roleSuggestions button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #26332c;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.roleSuggestions button:hover,
+.roleSuggestions button:focus-visible {
+  outline: none;
+  background: #f0f4e7;
+}
+
+.roleSuggestions button span {
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.roleSuggestions button small {
+  flex: none;
+  color: #839078;
+  font-size: 0.59rem;
+}
+
 .fieldset,
 .compactFieldset {
   min-width: 0;
