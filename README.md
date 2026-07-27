@@ -8,6 +8,13 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### Account and plan pages
+
+Offerly now includes responsive `/login`, `/register`, and `/plans` routes.
+The pricing page presents Basic, Premium, and Premium Plus tiers and explicitly
+states that payments are not active. Authentication forms are intentionally not
+connected until Supabase project credentials are configured.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A

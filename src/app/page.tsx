@@ -52,6 +52,12 @@ export default function Home() {
           <a className="text-link" href="#how-it-works">
             How it works
           </a>
+          <a className="text-link" href="/plans">
+            Plans
+          </a>
+          <a className="text-link" href="/login">
+            Log in
+          </a>
           <a className="button button-small button-dark" href="/interview/new">
             Start practicing
             <ArrowIcon />
