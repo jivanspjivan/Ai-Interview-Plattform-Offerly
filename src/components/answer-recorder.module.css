@@ -1,0 +1,170 @@
+.recorder {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #dfe2da;
+  border-radius: 14px;
+  background: #f7f8f2;
+}
+
+.ready,
+.recordingStatus,
+.savedHeading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ready > div,
+.recordingStatus > div,
+.savedHeading > div {
+  flex: 1;
+}
+
+.ready strong,
+.recordingStatus strong,
+.savedHeading strong {
+  font-size: 0.8rem;
+}
+
+.ready p,
+.recordingStatus p,
+.savedHeading p {
+  margin: 4px 0 0;
+  color: #768079;
+  font-size: 0.7rem;
+}
+
+.microphone {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #c8f269;
+  color: #27342c;
+  font-size: 0.7rem;
+}
+
+.recordButton,
+.stopButton,
+.savedActions button {
+  min-height: 43px;
+  padding-inline: 19px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.recordButton {
+  justify-self: start;
+  border: 0;
+  background: #17211d;
+  color: #fff;
+}
+
+.recordButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.recordingDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d55345;
+  box-shadow: 0 0 0 6px rgba(213, 83, 69, 0.12);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.recordingStatus time {
+  color: #37443c;
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.stopButton {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #d8d9d2;
+  background: #fffdf8;
+  color: #303d35;
+}
+
+.stopButton span {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: #d55345;
+}
+
+.savedHeading > span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e8f2d5;
+  color: #617748;
+  font-size: 0.58rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.audio {
+  width: 100%;
+  height: 42px;
+}
+
+.savedActions {
+  display: flex;
+  gap: 9px;
+}
+
+.savedActions button {
+  min-height: 38px;
+  border: 1px solid #d5d8d0;
+  background: #fffdf8;
+  color: #3d4a42;
+}
+
+.savedActions .deleteButton {
+  border-color: transparent;
+  background: transparent;
+  color: #a04f47;
+}
+
+.error {
+  margin: 0;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #faeae7;
+  color: #91473f;
+  font-size: 0.67rem;
+  line-height: 1.5;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 520px) {
+  .recordingStatus {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .recordingStatus time {
+    margin-left: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recordingDot {
+    animation: none;
+  }
+}

@@ -1,13 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { AnswerRecorder } from "@/components/answer-recorder";
 import { getQuestions } from "@/data/interview-questions";
 import type { InterviewSetup } from "@/types/interview";
 import styles from "./interview-session.module.css";
 
 type InterviewSessionProps = {
   setup: InterviewSetup;
+};
+
+type AnswerRecording = {
+  blob: Blob;
+  url: string;
 };
 
 function formatTime(totalSeconds: number) {
@@ -21,6 +27,10 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [recordings, setRecordings] = useState<
+    Record<string, AnswerRecording>
+  >({});
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     if (isComplete) return;
@@ -34,6 +44,9 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
 
   const question = questions[questionIndex];
   const progress = ((questionIndex + 1) / questions.length) * 100;
+  const handleRecordingChange = useCallback((recording: boolean) => {
+    setIsRecording(recording);
+  }, []);
 
   if (isComplete) {
     return (
@@ -70,6 +83,10 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
                 setQuestionIndex(0);
                 setElapsedSeconds(0);
                 setIsComplete(false);
+                Object.values(recordings).forEach((recording) =>
+                  URL.revokeObjectURL(recording.url),
+                );
+                setRecordings({});
               }}
             >
               Practice again
@@ -115,16 +132,27 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
         <article className={styles.questionCard}>
           <span className={styles.questionType}>{question.type}</span>
           <h1>{question.prompt}</h1>
-          <div className={styles.answerPrompt}>
-            <span aria-hidden="true">◉</span>
-            <div>
-              <strong>Answer out loud</strong>
-              <p>
-                Take a moment to think, then respond as if an interviewer were
-                listening.
-              </p>
-            </div>
-          </div>
+          <AnswerRecorder
+            audio={recordings[question.id]}
+            onAudioChange={(audio) =>
+              setRecordings((current) => {
+                const next = { ...current };
+                const previous = next[question.id];
+                if (previous) URL.revokeObjectURL(previous.url);
+
+                if (audio) {
+                  next[question.id] = {
+                    blob: audio,
+                    url: URL.createObjectURL(audio),
+                  };
+                } else {
+                  delete next[question.id];
+                }
+                return next;
+              })
+            }
+            onRecordingChange={handleRecordingChange}
+          />
           <aside className={styles.guidance}>
             <strong>Answering tip</strong>
             <p>{question.guidance}</p>
@@ -135,7 +163,7 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
           <button
             className={styles.previousButton}
             type="button"
-            disabled={questionIndex === 0}
+            disabled={questionIndex === 0 || isRecording}
             onClick={() => setQuestionIndex((current) => current - 1)}
           >
             ← Previous
@@ -143,6 +171,7 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
           <button
             className={styles.nextButton}
             type="button"
+            disabled={isRecording}
             onClick={() => {
               if (questionIndex === questions.length - 1) {
                 setIsComplete(true);
@@ -156,6 +185,11 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
               : "Next question →"}
           </button>
         </footer>
+        {isRecording && (
+          <p className={styles.recordingNotice}>
+            Stop the recording before changing questions.
+          </p>
+        )}
       </section>
     </main>
   );

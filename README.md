@@ -8,6 +8,14 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### Browser answer recording
+
+Each interview question includes microphone controls powered by the browser
+`MediaRecorder` API. Candidates can record, stop, play back, delete, and
+re-record an answer. Recordings remain in browser memory for the current session,
+and question navigation is disabled while the microphone is actively recording.
+Permission denials and unsupported browsers receive a visible error message.
+
 ### Mock interview session
 
 Submitting the interview setup now opens `/interview/session` with the selected
@@ -117,7 +125,8 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Offerly product identity
 - [x] Interview setup form
 - [x] Mock interview session
-- [ ] Answer recording and transcription
+- [x] Answer recording
+- [ ] Answer transcription
 - [ ] AI-generated feedback
 - [ ] Session history and progress tracking
 
