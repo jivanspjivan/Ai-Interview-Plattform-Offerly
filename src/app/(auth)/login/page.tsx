@@ -33,6 +33,23 @@ export default function LoginPage() {
             <li>Review transcripts and feedback</li>
             <li>Track improvement over time</li>
           </ul>
+          <div
+            className={styles.trustLine}
+            aria-label="Illustrative Offerly practice metrics"
+          >
+            <div>
+              <strong>5,000+</strong>
+              <span>sample practice metric</span>
+            </div>
+            <div>
+              <strong>Student-focused</strong>
+              <span>practice experience</span>
+            </div>
+            <div>
+              <strong>34%</strong>
+              <span>illustrative score lift</span>
+            </div>
+          </div>
         </section>
         <AuthForm mode="login" />
       </div>

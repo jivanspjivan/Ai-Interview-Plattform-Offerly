@@ -33,6 +33,23 @@ export default function RegisterPage() {
             <li>Answer recording and transcription</li>
             <li>Actionable AI coaching</li>
           </ul>
+          <div
+            className={styles.trustLine}
+            aria-label="Illustrative Offerly practice metrics"
+          >
+            <div>
+              <strong>5,000+</strong>
+              <span>sample practice metric</span>
+            </div>
+            <div>
+              <strong>Student-focused</strong>
+              <span>practice experience</span>
+            </div>
+            <div>
+              <strong>34%</strong>
+              <span>illustrative score lift</span>
+            </div>
+          </div>
         </section>
         <AuthForm mode="register" />
       </div>

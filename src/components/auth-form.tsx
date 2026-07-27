@@ -34,7 +34,6 @@ export function AuthForm({ mode }: AuthFormProps) {
       <button className={styles.googleButton} type="button" disabled>
         <span aria-hidden="true">G</span>
         Continue with Google
-        <small>Coming soon</small>
       </button>
 
       <div className={styles.divider}>
