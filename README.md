@@ -8,6 +8,13 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### Illustrative testimonial gallery
+
+The landing page includes a responsive 15-card testimonial preview with ten
+India-based and five US-based sample profiles, star ratings, dates, roles, and
+sample company outcomes. Every entry is visibly labeled as illustrative until
+it can be replaced with a verified customer review.
+
 ### Account and plan pages
 
 Offerly now includes responsive `/login`, `/register`, and `/plans` routes.

@@ -146,6 +146,42 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="testimonials shell" aria-labelledby="stories-heading">
+        <div className="section-heading testimonials-heading">
+          <p className="eyebrow">Illustrative candidate stories</p>
+          <h2 id="stories-heading">See what focused practice can change.</h2>
+          <p className="testimonial-disclaimer">
+            These are sample testimonials for previewing the experience—not
+            verified customer reviews or employment claims.
+          </p>
+        </div>
+        <div className="testimonial-grid">
+          {testimonials.map((testimonial) => (
+            <article className="testimonial-card" key={`${testimonial.name}-${testimonial.date}`}>
+              <div className="testimonial-topline">
+                <span className="sample-badge">Sample</span>
+                <span className="testimonial-stars" aria-label={`${testimonial.rating} out of 5 stars`}>
+                  {"★".repeat(testimonial.rating)}
+                  <i aria-hidden="true">{"★".repeat(5 - testimonial.rating)}</i>
+                </span>
+              </div>
+              <blockquote>“{testimonial.quote}”</blockquote>
+              <div className="testimonial-person">
+                <span aria-hidden="true">{testimonial.name.replace(".", "").split(" ").map((part) => part[0]).join("")}</span>
+                <div>
+                  <strong>{testimonial.name}</strong>
+                  <small>{testimonial.role} · {testimonial.location}</small>
+                </div>
+              </div>
+              <dl className="testimonial-outcome">
+                <div><dt>Sample outcome</dt><dd>{testimonial.companyOutcome}</dd></div>
+                <div><dt>Preview date</dt><dd>{testimonial.date}</dd></div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="process shell" id="how-it-works">
         <div className="section-heading">
           <p className="eyebrow">A better practice loop</p>
@@ -164,3 +200,4 @@ export default function Home() {
     </main>
   );
 }
+import { testimonials } from "@/data/testimonials";
