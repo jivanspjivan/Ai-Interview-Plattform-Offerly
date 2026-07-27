@@ -267,10 +267,8 @@ export function AnswerRecorder({
             onClick={transcribeAnswer}
           >
             {transcriptionStatus === "loading"
-              ? "Transcribing…"
-              : audio.transcript
-                ? "Transcribe again"
-                : "Create transcript"}
+              ? "Preparing answer…"
+              : "Use this answer"}
           </button>
           <button type="button" onClick={startRecording}>
             Re-record
@@ -365,12 +363,19 @@ export function AnswerRecorder({
     <section className={styles.recorder}>
       <div className={styles.ready}>
         <span className={styles.microphone} aria-hidden="true">
-          ●
+          <svg viewBox="0 0 24 24">
+            <path d="M12 15.5a4 4 0 0 0 4-4v-5a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4Zm-6-4a6 6 0 0 0 12 0M12 17.5V21m-3 0h6" />
+          </svg>
         </span>
         <div>
           <strong>Answer out loud</strong>
           <p>Record your response when you are ready.</p>
         </div>
+        <span className={styles.waveform} aria-hidden="true">
+          {[8, 15, 23, 12, 27, 18, 10, 21, 14, 8].map((height, index) => (
+            <i key={`${height}-${index}`} style={{ height }} />
+          ))}
+        </span>
       </div>
       <button
         className={styles.recordButton}
@@ -378,6 +383,9 @@ export function AnswerRecorder({
         disabled={status === "requesting"}
         onClick={startRecording}
       >
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M12 15.5a4 4 0 0 0 4-4v-5a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4Zm-6-4a6 6 0 0 0 12 0M12 17.5V21m-3 0h6" />
+        </svg>
         {status === "requesting" ? "Requesting microphone…" : "Record answer"}
       </button>
       {status === "error" && (

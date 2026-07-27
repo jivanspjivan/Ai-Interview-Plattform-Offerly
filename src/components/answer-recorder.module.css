@@ -1,7 +1,7 @@
 .recorder {
   display: grid;
   gap: 16px;
-  padding: 20px;
+  padding: 18px 20px;
   border: 1px solid #dfe2da;
   border-radius: 14px;
   background: #f7f8f2;
@@ -41,9 +41,42 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #c8f269;
-  color: #27342c;
-  font-size: 0.7rem;
+  background: #b4c77c;
+  color: #18271f;
+}
+
+.microphone svg,
+.recordButton svg {
+  width: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.waveform {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding-inline: 6px;
+}
+
+.waveform i {
+  width: 3px;
+  border-radius: 999px;
+  background: #829574;
+  opacity: 0.76;
+  animation: idleWave 2.4s ease-in-out infinite;
+}
+
+.waveform i:nth-child(2n) {
+  animation-delay: 180ms;
+}
+
+.waveform i:nth-child(3n) {
+  animation-delay: 360ms;
 }
 
 .recordButton,
@@ -59,10 +92,31 @@
 }
 
 .recordButton {
+  min-width: 184px;
   justify-self: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 0;
   background: #17211d;
   color: #fff;
+  transition:
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.recordButton:hover:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(23, 33, 29, 0.2);
+  transform: translateY(-2px);
+}
+
+.recordButton:hover:not(:disabled) svg {
+  color: #d7e5ba;
+}
+
+.recordButton svg {
+  width: 16px;
 }
 
 .recordButton:disabled {
@@ -305,6 +359,13 @@
   }
 }
 
+@keyframes idleWave {
+  50% {
+    opacity: 0.95;
+    transform: scaleY(1.08);
+  }
+}
+
 @media (max-width: 520px) {
   .recordingStatus {
     align-items: flex-start;
@@ -335,7 +396,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .recordingDot {
+  .recordingDot,
+  .waveform i {
     animation: none;
+  }
+
+  .recordButton {
+    transition: none;
   }
 }

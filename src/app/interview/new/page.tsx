@@ -19,7 +19,8 @@ export default function NewInterviewPage() {
         </Link>
         <p>Interview setup</p>
         <Link className={styles.backLink} href="/">
-          Back home
+          <span aria-hidden="true">←</span>
+          <span>Back home</span>
         </Link>
       </nav>
 

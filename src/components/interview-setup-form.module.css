@@ -7,11 +7,15 @@
 }
 
 .form {
-  padding: clamp(28px, 5vw, 48px);
+  margin-top: -20px;
+  padding: clamp(26px, 4vw, 42px);
+  padding-bottom: calc(clamp(26px, 4vw, 42px) + 18px);
+  border-color: #cfd4cb;
+  box-shadow: 0 30px 76px rgba(39, 56, 46, 0.135);
 }
 
 .formHeading {
-  padding-bottom: 32px;
+  padding-bottom: 26px;
   border-bottom: 1px solid #e6e7e1;
 }
 
@@ -27,20 +31,20 @@
 .formHeading h2,
 .confirmation h2 {
   margin: 0;
-  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  font-size: clamp(1.5rem, 2.6vw, 1.93rem);
   letter-spacing: -0.05em;
 }
 
 .formHeading > p:last-child {
   margin: 10px 0 0;
-  color: #7b847f;
+  color: #5b675f;
   font-size: 0.78rem;
 }
 
 .field {
   display: grid;
   gap: 9px;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .field label,
@@ -56,7 +60,7 @@
   width: 100%;
   height: 49px;
   padding: 0 15px;
-  border: 1px solid #d4d7cf;
+  border: 1px solid #bdc3b9;
   border-radius: 10px;
   outline: none;
   background: #faf9f4;
@@ -64,18 +68,18 @@
   font: inherit;
   font-size: 0.84rem;
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+    border-color 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .field input:focus,
 .field select:focus {
-  border-color: #77983e;
-  box-shadow: 0 0 0 3px rgba(200, 242, 105, 0.32);
+  border-color: #4e5e53;
+  box-shadow: 0 0 0 4px rgba(119, 152, 62, 0.14);
 }
 
 .field > span {
-  color: #929993;
+  color: #56635b;
   font-size: 0.65rem;
 }
 
@@ -135,7 +139,7 @@
 .fieldset,
 .compactFieldset {
   min-width: 0;
-  margin: 29px 0 0;
+  margin: 25px 0 0;
   padding: 0;
   border: 0;
 }
@@ -149,16 +153,23 @@
 
 .optionCard {
   min-height: 126px;
-  display: flex;
+  display: grid;
   position: relative;
-  flex-direction: column;
-  padding: 16px 14px;
-  border: 1px solid #d9dbd4;
+  grid-template-columns: 18px 1fr;
+  align-content: start;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 16px;
+  padding: 18px 16px;
+  border: 1px solid #d0d4cc;
   border-radius: 12px;
+  background: #fffdf8;
   cursor: pointer;
   transition:
-    border-color 160ms ease,
-    background 160ms ease;
+    background 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
 }
 
 .optionCard input,
@@ -173,31 +184,52 @@
 .radioMark {
   width: 16px;
   height: 16px;
-  margin-bottom: 17px;
   border: 1px solid #bdc1ba;
   border-radius: 50%;
   box-shadow: inset 0 0 0 4px #fffdf8;
 }
 
 .optionCard strong {
-  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
 }
 
 .optionCard small {
-  margin-top: 5px;
-  color: #858e88;
+  grid-column: 1 / -1;
+  color: #56625b;
   font-size: 0.61rem;
   line-height: 1.45;
 }
 
 .selectedCard {
-  border-color: #8cad4e;
-  background: #f5f9eb;
+  border-color: #98aa78;
+  background: #f6f8f1;
+  box-shadow: 0 8px 20px rgba(83, 105, 65, 0.09);
 }
 
 .selectedCard .radioMark {
-  border-color: #759537;
-  background: #759537;
+  border-color: #7e925d;
+  background: #7e925d;
+}
+
+.selectedCard strong::after {
+  color: #6f8450;
+  content: "✓";
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.optionCard:hover {
+  border-color: #9da79a;
+  box-shadow: 0 10px 22px rgba(39, 56, 46, 0.09);
+  transform: translateY(-2px);
+}
+
+.selectedCard:hover {
+  border-color: #879d65;
+  background: #f3f7ec;
 }
 
 .optionCard:focus-within {
@@ -235,12 +267,23 @@
   color: #7a837d;
   font-size: 0.67rem;
   font-weight: 750;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+  border: 1px solid transparent;
+}
+
+.segmentedControl label:hover span {
+  background: #e8ebe2;
+  color: #566159;
 }
 
 .segmentedControl input:checked + span {
-  background: #fffdf8;
-  color: #243129;
-  box-shadow: 0 2px 7px rgba(35, 48, 40, 0.09);
+  border-color: #91a66d;
+  background: #f0f4e8;
+  color: #283a2d;
+  box-shadow: 0 2px 8px rgba(62, 84, 52, 0.11);
 }
 
 .segmentedControl input:focus-visible + span {
@@ -265,28 +308,40 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 35px;
-  background: #c8f269;
+  margin-top: 30px;
+  background: #b4c77c;
   color: #17211d;
   transition:
-    background 160ms ease,
-    transform 160ms ease;
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
 }
 
 .submitButton:hover {
-  background: #b8e853;
-  transform: translateY(-1px);
+  background: #aabd70;
+  box-shadow: 0 10px 24px rgba(72, 94, 53, 0.18);
+  transform: translateY(-2px);
 }
 
 .submitButton span {
   font-size: 1.15rem;
+  transition: transform 220ms ease;
+}
+
+.submitButton:hover span {
+  transform: translateX(5px);
 }
 
 .privacyNote {
-  margin: 12px 0 0;
-  color: #959c97;
+  margin: 9px 0 0;
+  color: #65716a;
   font-size: 0.62rem;
   text-align: center;
+}
+
+.privacyNote span {
+  margin-right: 5px;
+  font-size: 0.64rem;
 }
 
 .confirmation {
@@ -375,7 +430,7 @@
   }
 
   .radioMark {
-    margin-bottom: 10px;
+    margin-bottom: 0;
   }
 }
 
@@ -383,6 +438,8 @@
   .field input,
   .field select,
   .optionCard,
+  .segmentedControl span,
+  .submitButton span,
   .submitButton {
     transition: none;
   }

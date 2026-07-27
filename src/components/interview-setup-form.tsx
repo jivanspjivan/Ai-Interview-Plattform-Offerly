@@ -170,6 +170,7 @@ export function InterviewSetupForm() {
         <span aria-hidden="true">→</span>
       </button>
       <p className={styles.privacyNote}>
+        <span aria-hidden="true">🔒</span>
         Your practice session is private and is not stored.
       </p>
     </form>
