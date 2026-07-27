@@ -7,9 +7,11 @@ type AnswerRecorderProps = {
   audio?: {
     blob: Blob;
     url: string;
+    transcript?: string;
   };
   onAudioChange: (audio: Blob | undefined) => void;
   onRecordingChange: (isRecording: boolean) => void;
+  onTranscriptChange: (transcript: string) => void;
 };
 
 type RecorderStatus = "idle" | "requesting" | "recording" | "error";
@@ -29,10 +31,15 @@ export function AnswerRecorder({
   audio,
   onAudioChange,
   onRecordingChange,
+  onTranscriptChange,
 }: AnswerRecorderProps) {
   const [status, setStatus] = useState<RecorderStatus>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
+  const [transcriptionStatus, setTranscriptionStatus] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+  const [transcriptionError, setTranscriptionError] = useState("");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -128,6 +135,42 @@ export function AnswerRecorder({
     }
   }
 
+  async function transcribeAnswer() {
+    if (!audio) return;
+
+    setTranscriptionStatus("loading");
+    setTranscriptionError("");
+
+    const formData = new FormData();
+    const extension = audio.blob.type.includes("mp4") ? "mp4" : "webm";
+    formData.append("audio", audio.blob, `answer.${extension}`);
+
+    try {
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as {
+        transcript?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !result.transcript) {
+        throw new Error(result.error || "Transcription failed.");
+      }
+
+      onTranscriptChange(result.transcript);
+      setTranscriptionStatus("idle");
+    } catch (error) {
+      setTranscriptionStatus("error");
+      setTranscriptionError(
+        error instanceof Error
+          ? error.message
+          : "The answer could not be transcribed.",
+      );
+    }
+  }
+
   if (status === "recording") {
     return (
       <section className={styles.recorder} aria-live="polite">
@@ -165,6 +208,18 @@ export function AnswerRecorder({
           Your browser does not support audio playback.
         </audio>
         <div className={styles.savedActions}>
+          <button
+            className={styles.transcribeButton}
+            type="button"
+            disabled={transcriptionStatus === "loading"}
+            onClick={transcribeAnswer}
+          >
+            {transcriptionStatus === "loading"
+              ? "Transcribing…"
+              : audio.transcript
+                ? "Transcribe again"
+                : "Create transcript"}
+          </button>
           <button type="button" onClick={startRecording}>
             Re-record
           </button>
@@ -179,6 +234,17 @@ export function AnswerRecorder({
             Delete
           </button>
         </div>
+        {transcriptionStatus === "error" && (
+          <p className={styles.error} role="alert">
+            {transcriptionError}
+          </p>
+        )}
+        {audio.transcript && (
+          <div className={styles.transcript}>
+            <strong>Transcript</strong>
+            <p>{audio.transcript}</p>
+          </div>
+        )}
       </section>
     );
   }

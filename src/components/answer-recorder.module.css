@@ -130,10 +130,41 @@
   color: #3d4a42;
 }
 
+.savedActions .transcribeButton {
+  border-color: #17211d;
+  background: #17211d;
+  color: #fff;
+}
+
+.savedActions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .savedActions .deleteButton {
   border-color: transparent;
   background: transparent;
   color: #a04f47;
+}
+
+.transcript {
+  padding: 15px;
+  border-radius: 10px;
+  background: #fffdf8;
+}
+
+.transcript strong {
+  color: #627450;
+  font-size: 0.64rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.transcript p {
+  margin: 7px 0 0;
+  color: #3f4c44;
+  font-size: 0.74rem;
+  line-height: 1.65;
 }
 
 .error {
@@ -160,6 +191,11 @@
 
   .recordingStatus time {
     margin-left: 26px;
+  }
+
+  .savedActions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

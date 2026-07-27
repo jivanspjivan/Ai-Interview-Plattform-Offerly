@@ -8,6 +8,14 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### Answer transcription
+
+Recorded answers can be sent to the server-side `/api/transcribe` route and
+converted into text with OpenAI's `gpt-4o-mini-transcribe` model. The route
+validates audio format and size before forwarding it, keeps the API key on the
+server, and returns actionable errors to the recording interface. Transcripts
+remain associated with their question for the current browser session.
+
 ### Browser answer recording
 
 Each interview question includes microphone controls powered by the browser
@@ -126,7 +134,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Interview setup form
 - [x] Mock interview session
 - [x] Answer recording
-- [ ] Answer transcription
+- [x] Answer transcription
 - [ ] AI-generated feedback
 - [ ] Session history and progress tracking
 

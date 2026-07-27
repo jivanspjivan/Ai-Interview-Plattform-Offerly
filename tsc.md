@@ -84,6 +84,13 @@ src/components/interview-session.tsx     Client Component
   - selects questions from the local question bank
   - tracks question progress and elapsed time
   - renders the completion summary
+                    |
+                    v
+src/app/api/transcribe/route.ts           Server Route Handler
+  - validates uploaded audio type and size
+  - reads the OpenAI API key only on the server
+  - forwards audio to the transcription API
+  - returns transcript text or a safe error response
 ```
 
 ## 3. Request flow
@@ -96,8 +103,12 @@ When a visitor opens `/`:
 4. The browser receives the generated HTML and CSS.
 5. Responsive CSS changes the layout according to the viewport width.
 
-There is no database or external API in this flow yet. Those boundaries will be
-introduced and documented when their features are implemented.
+The initial landing and setup flow does not require a database or external API.
+
+Answer transcription introduces the first external API boundary. The browser
+sends a multipart request to `/api/transcribe`; the Route Handler validates the
+file and calls OpenAI with `OPENAI_API_KEY`. The browser never receives that key.
+Recordings and transcripts are still temporary and are not stored in a database.
 
 When a visitor configures an interview:
 

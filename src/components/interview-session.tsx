@@ -14,6 +14,7 @@ type InterviewSessionProps = {
 type AnswerRecording = {
   blob: Blob;
   url: string;
+  transcript?: string;
 };
 
 function formatTime(totalSeconds: number) {
@@ -152,6 +153,15 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
               })
             }
             onRecordingChange={handleRecordingChange}
+            onTranscriptChange={(transcript) =>
+              setRecordings((current) => ({
+                ...current,
+                [question.id]: {
+                  ...current[question.id],
+                  transcript,
+                },
+              }))
+            }
           />
           <aside className={styles.guidance}>
             <strong>Answering tip</strong>
