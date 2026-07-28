@@ -3,6 +3,7 @@
 
 # Next.js build output
 /.next
+/.next-e2e
 /out
 
 # production output
@@ -22,3 +23,8 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright
+/playwright-report
+/test-results
+/blob-report

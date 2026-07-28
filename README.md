@@ -97,6 +97,17 @@ Razorpay HMAC verification, subscription-status normalization, and out-of-order
 webhook handling. Run it with `npm test`, or use `npm run test:watch` while
 developing.
 
+Playwright adds browser-level coverage for the public conversion journey,
+interview setup and validation, plan links, guest protection, invalid session
+links, response security headers, and desktop/mobile overflow. Its isolated
+`.next-e2e` server does not interfere with a developer server already running
+from the repository.
+
+Authenticated persistence, OpenAI, and Razorpay browser journeys require
+dedicated external-service test accounts and remain the next test layer; the
+default suite deliberately clears those credentials so it is deterministic and
+cannot create real users, AI charges, or payments.
+
 ### Admin user dashboard
 
 Allowlisted administrators can open `/dashboard/admin` to review total users,
@@ -265,6 +276,14 @@ npm run lint        # check code quality and Next.js rules
 npm run type-check  # check TypeScript without generating files
 npm test            # run the automated test suite once
 npm run test:watch  # rerun relevant tests while developing
+npm run test:e2e    # run Chromium browser journeys
+npm run test:e2e:ui # open Playwright's interactive test runner
+```
+
+Install the browser binary once before the first end-to-end run:
+
+```bash
+npx playwright install chromium
 ```
 
 ## Project structure
@@ -310,6 +329,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Automated billing and entitlement reliability tests
 - [x] Protected admin user and subscription dashboard
 - [x] Distributed API rate limiting and security headers
+- [x] Playwright public-journey, security, and responsive browser tests
 
 ## Branch strategy
 

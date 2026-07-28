@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
+const scriptSources = [
+  "'self'",
+  "'unsafe-inline'",
+  ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : []),
+  "https://checkout.razorpay.com",
+].join(" ");
+
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   async headers() {
     return [
       {
@@ -25,7 +33,7 @@ const nextConfig: NextConfig = {
               "frame-ancestors 'none'",
               "form-action 'self'",
               "object-src 'none'",
-              "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
+              `script-src ${scriptSources}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://www.google.com",
               "font-src 'self'",
