@@ -25,27 +25,67 @@ function emailHtml(template: string, payload: Record<string, unknown>) {
   return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#22342a"><h1>Hi ${name},</h1><p>${messages[template] ?? "There is an update to your Offerly account."}</p><p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/dashboard">Open Offerly</a></p></div>`;
 }
 
+type EmailProvider = "brevo" | "resend";
+
+function emailProvider(): EmailProvider {
+  const provider = (process.env.EMAIL_PROVIDER ?? "resend").toLowerCase();
+  if (provider !== "brevo" && provider !== "resend") {
+    throw new Error(`Unsupported email provider: ${provider}.`);
+  }
+  return provider;
+}
+
+function parseSender(value: string) {
+  const match = value.match(/^\s*(.*?)\s*<([^<>]+)>\s*$/);
+  if (match) {
+    return { name: match[1].trim(), email: match[2].trim() };
+  }
+  return { name: "Offerly", email: value.trim() };
+}
+
 export async function deliverQueuedEmail(email: {
   recipient: string;
   subject: string;
   template: string;
   payload: Record<string, unknown>;
 }) {
-  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+  const provider = emailProvider();
+  const from = process.env.EMAIL_FROM;
+  const apiKey = provider === "brevo"
+    ? process.env.BREVO_API_KEY
+    : process.env.RESEND_API_KEY;
+
+  if (!apiKey || !from) {
     throw new Error("Email delivery is not configured.");
   }
-  const response = await fetch("https://api.resend.com/emails", {
+
+  const html = emailHtml(email.template, email.payload);
+  const isBrevo = provider === "brevo";
+  const response = await fetch(
+    isBrevo ? "https://api.brevo.com/v3/smtp/email" : "https://api.resend.com/emails",
+    {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+    headers: isBrevo ? {
+      "api-key": apiKey,
+      accept: "application/json",
+      "Content-Type": "application/json",
+    } : {
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: process.env.EMAIL_FROM,
+    body: JSON.stringify(isBrevo ? {
+      sender: parseSender(from),
+      to: [{ email: email.recipient }],
+      subject: email.subject,
+      htmlContent: html,
+    } : {
+      from,
       to: [email.recipient],
       subject: email.subject,
-      html: emailHtml(email.template, email.payload),
+      html,
     }),
   });
-  if (!response.ok) throw new Error(`Email provider returned ${response.status}.`);
+  if (!response.ok) {
+    throw new Error(`${provider} returned ${response.status}.`);
+  }
 }

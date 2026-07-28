@@ -137,7 +137,8 @@ as a no-cost and offline fallback.
 Saved session reports include a consolidated score, readiness benchmark, and
 print/PDF export. Completion notifications use a retryable email outbox. Invoke
 `POST /api/cron/email-outbox` with `Authorization: Bearer $CRON_SECRET` from the
-deployment scheduler; delivery uses Resend when its environment values are set.
+deployment scheduler. Set `EMAIL_PROVIDER=brevo` with `BREVO_API_KEY`, or set
+`EMAIL_PROVIDER=resend` with `RESEND_API_KEY`; both providers use `EMAIL_FROM`.
 
 ### Account and subscription management
 
@@ -303,7 +304,7 @@ npm run dev
 
 Apply all SQL files in `supabase/migrations` in filename order before enabling
 the operational features. Copy `.env.example` and configure Supabase, OpenAI,
-Razorpay, Resend, the public site URL, and a long random cron secret.
+Razorpay, an email provider, the public site URL, and a long random cron secret.
 
 Open [http://localhost:3000](http://localhost:3000).
 
