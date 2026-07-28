@@ -3,6 +3,11 @@ import type { InterviewFeedback } from "@/types/interview-feedback";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { currentMonthStart, getEntitlements } from "@/lib/entitlements";
+import {
+  enforceRateLimit,
+  parseJsonBody,
+  sameOriginError,
+} from "@/lib/api-security";
 
 const MAX_TRANSCRIPT_LENGTH = 12_000;
 
@@ -75,6 +80,8 @@ function isNonEmptyString(value: unknown, maxLength: number): value is string {
 }
 
 export async function POST(request: Request) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -84,16 +91,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: FeedbackRequest;
-
-  try {
-    body = (await request.json()) as FeedbackRequest;
-  } catch {
-    return NextResponse.json(
-      { error: "The request body must be valid JSON." },
-      { status: 400 },
-    );
-  }
+  const parsedBody = await parseJsonBody<FeedbackRequest>(request, 16 * 1024);
+  if ("response" in parsedBody) return parsedBody.response;
+  const body = parsedBody.data;
 
   if (
     !isNonEmptyString(body.role, 80) ||
@@ -107,6 +107,7 @@ export async function POST(request: Request) {
     );
   }
 
+  let userId: string | undefined;
   if (hasSupabaseConfig()) {
     const supabase = await createClient();
     const {
@@ -118,6 +119,7 @@ export async function POST(request: Request) {
         { status: 401 },
       );
     }
+    userId = user.id;
     const entitlements = await getEntitlements(supabase, user.id);
     if (entitlements.monthlyFeedbackLimit !== null) {
       const { count } = await supabase
@@ -136,6 +138,14 @@ export async function POST(request: Request) {
       }
     }
   }
+
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "feedback",
+    limit: 10,
+    windowSeconds: 10 * 60,
+    userId,
+  });
+  if (rateLimitError) return rateLimitError;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {

@@ -1,4 +1,11 @@
 import { NextResponse } from "next/server";
+import {
+  enforceRateLimit,
+  exceedsContentLength,
+  sameOriginError,
+} from "@/lib/api-security";
+import { hasSupabaseConfig } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/server";
 
 const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
 const SUPPORTED_AUDIO_TYPES = new Set([
@@ -17,6 +24,12 @@ type OpenAITranscriptionResponse = {
 };
 
 export async function POST(request: Request) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
+  if (exceedsContentLength(request, MAX_AUDIO_SIZE + 1024 * 1024)) {
+    return NextResponse.json({ error: "Audio request is too large." }, { status: 413 });
+  }
+
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -25,6 +38,28 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
+
+  let userId: string | undefined;
+  if (hasSupabaseConfig()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Log in to transcribe interview answers." },
+        { status: 401 },
+      );
+    }
+    userId = user.id;
+  }
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "transcribe",
+    limit: 12,
+    windowSeconds: 10 * 60,
+    userId,
+  });
+  if (rateLimitError) return rateLimitError;
 
   let formData: FormData;
 

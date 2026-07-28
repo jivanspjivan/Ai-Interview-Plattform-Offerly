@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import type { InterviewFeedback } from "@/types/interview-feedback";
+import {
+  enforceRateLimit,
+  parseJsonBody,
+  sameOriginError,
+} from "@/lib/api-security";
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>;
@@ -26,12 +31,16 @@ function isFeedback(value: unknown): value is InterviewFeedback {
 }
 
 export async function PUT(request: Request, { params }: RouteContext) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   if (!hasSupabaseConfig()) {
     return NextResponse.json({ error: "Persistence is not configured." }, { status: 503 });
   }
 
   const { sessionId } = await params;
-  const body = (await request.json()) as Record<string, unknown>;
+  const parsedBody = await parseJsonBody<Record<string, unknown>>(request, 32 * 1024);
+  if ("response" in parsedBody) return parsedBody.response;
+  const body = parsedBody.data;
   const questionId =
     typeof body.questionId === "string" ? body.questionId.trim() : "";
   const questionPrompt =
@@ -57,6 +66,13 @@ export async function PUT(request: Request, { params }: RouteContext) {
   if (!user) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "answers-save",
+    limit: 120,
+    windowSeconds: 10 * 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
 
   const { data: session } = await supabase
     .from("interview_sessions")

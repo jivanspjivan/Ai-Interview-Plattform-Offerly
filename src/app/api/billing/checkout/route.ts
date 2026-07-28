@@ -7,10 +7,26 @@ import {
 } from "@/lib/plans";
 import { createRazorpaySubscription, getRazorpayConfig } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  enforceRateLimit,
+  parseJsonBody,
+  sameOriginError,
+} from "@/lib/api-security";
 
 export async function POST(request: Request) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   const user = await requireUser();
-  const body = (await request.json()) as { plan?: unknown };
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "billing-checkout",
+    limit: 10,
+    windowSeconds: 10 * 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
+  const parsedBody = await parseJsonBody<{ plan?: unknown }>(request, 4 * 1024);
+  if ("response" in parsedBody) return parsedBody.response;
+  const body = parsedBody.data;
   if (!isPaidPlan(body.plan)) {
     return NextResponse.json({ error: "Choose a valid paid plan." }, { status: 400 });
   }

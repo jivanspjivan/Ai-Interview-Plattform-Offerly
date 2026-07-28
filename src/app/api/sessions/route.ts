@@ -7,8 +7,13 @@ import {
   isInterviewDuration,
   isInterviewType,
 } from "@/types/interview";
+import {
+  enforceRateLimit,
+  parseJsonBody,
+  sameOriginError,
+} from "@/lib/api-security";
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!hasSupabaseConfig()) {
     return NextResponse.json({ error: "Persistence is not configured." }, { status: 503 });
   }
@@ -20,6 +25,13 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "sessions-read",
+    limit: 120,
+    windowSeconds: 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
 
   const { data, error } = await supabase
     .from("interview_sessions")
@@ -35,11 +47,15 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   if (!hasSupabaseConfig()) {
     return NextResponse.json({ error: "Persistence is not configured." }, { status: 503 });
   }
 
-  const body = (await request.json()) as Record<string, unknown>;
+  const parsedBody = await parseJsonBody<Record<string, unknown>>(request, 8 * 1024);
+  if ("response" in parsedBody) return parsedBody.response;
+  const body = parsedBody.data;
   const role = typeof body.role === "string" ? body.role.trim() : "";
   const interviewType =
     typeof body.interviewType === "string" ? body.interviewType : "";
@@ -68,6 +84,13 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "sessions-create",
+    limit: 20,
+    windowSeconds: 10 * 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
 
   const entitlements = await getEntitlements(supabase, user.id);
   if (entitlements.monthlySessionLimit !== null) {

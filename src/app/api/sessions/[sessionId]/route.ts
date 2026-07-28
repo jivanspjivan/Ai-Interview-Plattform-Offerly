@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import {
+  enforceRateLimit,
+  parseJsonBody,
+  sameOriginError,
+} from "@/lib/api-security";
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>;
 };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   if (!hasSupabaseConfig()) {
     return NextResponse.json({ error: "Persistence is not configured." }, { status: 503 });
   }
 
   const { sessionId } = await params;
-  const body = (await request.json()) as Record<string, unknown>;
+  const parsedBody = await parseJsonBody<Record<string, unknown>>(request, 4 * 1024);
+  if ("response" in parsedBody) return parsedBody.response;
+  const body = parsedBody.data;
   const status = body.status;
   const elapsedSeconds = Number(body.elapsedSeconds);
 
@@ -31,6 +40,13 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   if (!user) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "sessions-update",
+    limit: 60,
+    windowSeconds: 10 * 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
 
   const { data, error } = await supabase
     .from("interview_sessions")

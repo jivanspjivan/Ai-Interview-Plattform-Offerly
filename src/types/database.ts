@@ -90,6 +90,13 @@ export type BillingEventRow = {
   processed_at: string;
 };
 
+export type ApiRateLimitRow = {
+  identifier: string;
+  action: string;
+  window_started_at: string;
+  request_count: number;
+};
+
 type Insert<T, Generated extends keyof T> = Omit<T, Generated> &
   Partial<Pick<T, Generated>>;
 
@@ -162,9 +169,29 @@ export type Database = {
         Update: Update<BillingEventRow>;
         Relationships: [];
       };
+      api_rate_limits: {
+        Row: ApiRateLimitRow;
+        Insert: Insert<ApiRateLimitRow, "window_started_at" | "request_count">;
+        Update: Update<ApiRateLimitRow>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      consume_rate_limit: {
+        Args: {
+          p_identifier: string;
+          p_action: string;
+          p_limit: number;
+          p_window_seconds: number;
+        };
+        Returns: Array<{
+          allowed: boolean;
+          remaining: number;
+          reset_at: string;
+        }>;
+      };
+    };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };

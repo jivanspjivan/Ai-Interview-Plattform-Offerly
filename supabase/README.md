@@ -12,4 +12,6 @@ Alternatively, paste each migration into the Supabase SQL editor.
 The initial migration creates profiles, interview sessions, answers, feedback,
 indexes, timestamp triggers, automatic profile creation, and owner-only Row
 Level Security policies. The second migration adds subscriptions and idempotent
-billing-event storage. Subscription writes remain service-role-only.
+billing-event storage. The third adds the server-only atomic API rate-limit
+store and its restricted database function. Subscription and rate-limit writes
+remain service-role-only.

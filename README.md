@@ -106,6 +106,20 @@ subscription lifecycle status, interview count, join date, and last sign-in.
 The page uses the Supabase service role only on the server and redirects
 non-admin users back to their dashboard.
 
+### API security and rate limiting
+
+Sensitive and resource-intensive endpoints use an atomic, Supabase-backed rate
+limiter that works across multiple application instances. AI feedback is limited
+to 10 requests per 10 minutes per user and transcription to 12; session and
+billing routes use separate limits suited to their expected traffic. Rejected
+requests return HTTP `429` with `Retry-After` and rate-limit metadata.
+
+Cookie-authenticated mutations reject cross-site browser requests. JSON and
+audio payload sizes are bounded before external API work, webhook bodies remain
+HMAC-verified, and global response headers add CSP, clickjacking protection,
+MIME sniffing protection, HTTPS enforcement, referrer controls, and a restricted
+browser permissions policy.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -228,6 +242,8 @@ supabase db push
 ```
 
 See `supabase/README.md` for the SQL editor alternative.
+The API security migration is required in every deployed environment; protected
+routes intentionally return `503` if the shared rate-limit store is unavailable.
 
 Create ₹199/month and ₹399/month plans in Razorpay, then add their plan IDs to
 the environment. Configure an HTTPS webhook pointing to
@@ -293,6 +309,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Razorpay subscription checkout, billing, and plan limits
 - [x] Automated billing and entitlement reliability tests
 - [x] Protected admin user and subscription dashboard
+- [x] Distributed API rate limiting and security headers
 
 ## Branch strategy
 

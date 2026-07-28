@@ -2,10 +2,26 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { getRazorpayConfig, verifySignature } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  enforceRateLimit,
+  parseJsonBody,
+  sameOriginError,
+} from "@/lib/api-security";
 
 export async function POST(request: Request) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   const user = await requireUser();
-  const body = (await request.json()) as Record<string, unknown>;
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "billing-verify",
+    limit: 15,
+    windowSeconds: 10 * 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
+  const parsedBody = await parseJsonBody<Record<string, unknown>>(request, 8 * 1024);
+  if ("response" in parsedBody) return parsedBody.response;
+  const body = parsedBody.data;
   const paymentId =
     typeof body.razorpay_payment_id === "string"
       ? body.razorpay_payment_id

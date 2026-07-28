@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifySignature } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json, SubscriptionRow } from "@/types/database";
+import { exceedsContentLength } from "@/lib/api-security";
 
 type RazorpaySubscriptionEntity = {
   id?: string;
@@ -52,10 +53,16 @@ export function shouldApplyWebhookEvent(
 }
 
 export async function POST(request: Request) {
+  if (exceedsContentLength(request, 256 * 1024)) {
+    return NextResponse.json({ error: "Webhook body is too large." }, { status: 413 });
+  }
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const signature = request.headers.get("x-razorpay-signature") ?? "";
   const eventId = request.headers.get("x-razorpay-event-id") ?? "";
   const rawBody = await request.text();
+  if (Buffer.byteLength(rawBody, "utf8") > 256 * 1024) {
+    return NextResponse.json({ error: "Webhook body is too large." }, { status: 413 });
+  }
 
   if (
     !webhookSecret ||
@@ -66,7 +73,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
   }
 
-  const event = JSON.parse(rawBody) as RazorpayWebhook;
+  let event: RazorpayWebhook;
+  try {
+    event = JSON.parse(rawBody) as RazorpayWebhook;
+  } catch {
+    return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
+  }
   const admin = createAdminClient();
   const { data: processed } = await admin
     .from("billing_events")

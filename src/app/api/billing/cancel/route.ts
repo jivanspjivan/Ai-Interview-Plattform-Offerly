@@ -2,9 +2,19 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { getRazorpayConfig } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { enforceRateLimit, sameOriginError } from "@/lib/api-security";
 
-export async function POST() {
+export async function POST(request: Request) {
+  const originError = sameOriginError(request);
+  if (originError) return originError;
   const user = await requireUser();
+  const rateLimitError = await enforceRateLimit(request, {
+    action: "billing-cancel",
+    limit: 5,
+    windowSeconds: 10 * 60,
+    userId: user.id,
+  });
+  if (rateLimitError) return rateLimitError;
   const admin = createAdminClient();
   const { data: subscription } = await admin
     .from("subscriptions")
