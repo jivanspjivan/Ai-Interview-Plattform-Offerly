@@ -53,14 +53,18 @@ export function PasswordForm({ mode }: PasswordFormProps) {
         }, 900);
       } else {
         const email = String(formData.get("email") ?? "").trim();
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+        const response = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
         });
-        if (error) throw error;
+        const result = await response.json() as { error?: string; message?: string };
+        if (!response.ok) throw new Error(result.error ?? "Unable to send recovery email.");
 
         setIsError(false);
         setMessage(
-          "If an account exists for that email, a password-reset link is on its way.",
+          result.message ??
+            "If an account exists for that email, a password-reset link is on its way.",
         );
       }
     } catch (error) {

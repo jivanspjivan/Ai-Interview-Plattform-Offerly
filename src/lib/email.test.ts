@@ -58,4 +58,26 @@ describe("deliverQueuedEmail", () => {
     await expect(deliverQueuedEmail(message))
       .rejects.toThrow("Unsupported email provider");
   });
+
+  it("renders a password recovery link", async () => {
+    process.env.EMAIL_PROVIDER = "brevo";
+    process.env.BREVO_API_KEY = "brevo-key";
+    process.env.EMAIL_FROM = "Offerly <owner@gmail.com>";
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null, { status: 201 }));
+
+    await deliverQueuedEmail({
+      recipient: "candidate@example.com",
+      subject: "Reset your Offerly password",
+      template: "password_reset",
+      payload: { actionLink: "https://auth.example.com/recover?token=secure" },
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.brevo.com/v3/smtp/email",
+      expect.objectContaining({
+        body: expect.stringContaining("https://auth.example.com/recover?token=secure"),
+      }),
+    );
+  });
 });

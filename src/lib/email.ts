@@ -17,6 +17,13 @@ export async function queueEmail({
 
 function emailHtml(template: string, payload: Record<string, unknown>) {
   const name = typeof payload.name === "string" ? payload.name : "there";
+  if (template === "password_reset") {
+    const actionLink = typeof payload.actionLink === "string"
+      ? payload.actionLink
+      : "";
+    if (!actionLink) throw new Error("Password reset email requires an action link.");
+    return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#22342a"><h1>Reset your Offerly password</h1><p>Use the secure link below to choose a new password.</p><p><a href="${actionLink}">Reset password</a></p><p>If you did not request this, you can safely ignore this email.</p></div>`;
+  }
   const messages: Record<string, string> = {
     interview_completed: `Your interview practice report is ready. You can review your answers and feedback in Offerly.`,
     billing_attention: `Your subscription payment needs attention. Open Billing in Offerly to refresh its status or update payment details.`,
