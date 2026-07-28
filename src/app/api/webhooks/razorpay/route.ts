@@ -32,6 +32,25 @@ const allowedStatuses = new Set<SubscriptionRow["status"]>([
   "expired",
 ]);
 
+export function normalizeSubscriptionStatus(
+  status: string | undefined,
+): SubscriptionRow["status"] {
+  return allowedStatuses.has(status as SubscriptionRow["status"])
+    ? (status as SubscriptionRow["status"])
+    : "pending";
+}
+
+export function shouldApplyWebhookEvent(
+  lastEventAt: string | null,
+  eventCreatedAt: number | undefined,
+) {
+  return (
+    !lastEventAt ||
+    !eventCreatedAt ||
+    eventCreatedAt * 1000 >= new Date(lastEventAt).getTime()
+  );
+}
+
 export async function POST(request: Request) {
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const signature = request.headers.get("x-razorpay-signature") ?? "";
@@ -60,11 +79,7 @@ export async function POST(request: Request) {
 
   const entity = event.payload?.subscription?.entity;
   if (entity?.id) {
-    const status = allowedStatuses.has(
-      entity.status as SubscriptionRow["status"],
-    )
-      ? (entity.status as SubscriptionRow["status"])
-      : "pending";
+    const status = normalizeSubscriptionStatus(entity.status);
     const update = {
       status,
       razorpay_plan_id: entity.plan_id ?? null,
@@ -85,10 +100,10 @@ export async function POST(request: Request) {
       .eq("razorpay_subscription_id", entity.id)
       .maybeSingle();
     if (existing) {
-      const isNewer =
-        !existing.last_event_at ||
-        !event.created_at ||
-        event.created_at * 1000 >= new Date(existing.last_event_at).getTime();
+      const isNewer = shouldApplyWebhookEvent(
+        existing.last_event_at,
+        event.created_at,
+      );
       if (isNewer) {
         const { error: updateError } = await admin
           .from("subscriptions")

@@ -89,6 +89,14 @@ reports per calendar month. Active Premium and Premium Plus subscriptions remove
 those limits. Paid access is granted only after an `active` subscription webhook
 has been verified.
 
+### Automated reliability tests
+
+Vitest protects the billing and entitlement rules that control paid access.
+The suite covers plan validation, Basic-plan limits, UTC monthly boundaries,
+Razorpay HMAC verification, subscription-status normalization, and out-of-order
+webhook handling. Run it with `npm test`, or use `npm run test:watch` while
+developing.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -225,6 +233,8 @@ npm run build       # create a production build
 npm run start       # run the production build
 npm run lint        # check code quality and Next.js rules
 npm run type-check  # check TypeScript without generating files
+npm test            # run the automated test suite once
+npm run test:watch  # rerun relevant tests while developing
 ```
 
 ## Project structure
@@ -267,6 +277,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Supabase persistence schema, RLS, and saved interview data
 - [x] Session history and progress tracking
 - [x] Razorpay subscription checkout, billing, and plan limits
+- [x] Automated billing and entitlement reliability tests
 
 ## Branch strategy
 
