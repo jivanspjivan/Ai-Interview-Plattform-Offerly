@@ -35,8 +35,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin)
-      .replace(/\/$/, "");
+    const publicOrigin = request.headers.get("origin");
+    const siteUrl = (
+      publicOrigin ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      new URL(request.url).origin
+    ).replace(/\/$/, "");
     const admin = createAdminClient();
     const { data, error } = await admin.auth.admin.generateLink({
       type: "recovery",
