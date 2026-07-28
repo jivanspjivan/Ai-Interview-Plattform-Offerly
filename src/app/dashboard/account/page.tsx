@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { AccountSettings } from "@/components/account-settings";
 import styles from "../dashboard.module.css";
 
 export const metadata: Metadata = {
@@ -61,16 +61,10 @@ export default async function AccountPage() {
         </article>
       </div>
 
-      <div className={styles.settingsNotice}>
-        <div>
-          <strong>Your profile is connected to the Offerly database.</strong>
-          <p>
-            Editing profile fields and persistent interview preferences can be
-            added as the account experience expands.
-          </p>
-        </div>
-        <Link href="/dashboard">Back to overview</Link>
-      </div>
+      <AccountSettings
+        email={user.email ?? ""}
+        fullName={displayName === "Not provided" ? "" : displayName}
+      />
     </section>
   );
 }

@@ -117,6 +117,23 @@ subscription lifecycle status, interview count, join date, and last sign-in.
 The page uses the Supabase service role only on the server and redirects
 non-admin users back to their dashboard.
 
+### Account and subscription management
+
+The account dashboard supports profile-name updates, confirmation-based email
+changes, authenticated password changes, and permanent deletion confirmed with
+the account email. Confirmed identity updates synchronize back to the public
+profile record. Deletion
+removes the Supabase Auth user and all cascading profile, interview, feedback,
+and billing records. If recurring billing is still live, Offerly must cancel it
+successfully before any user data is erased.
+
+Active paid subscribers can upgrade from Premium to Premium Plus immediately or
+schedule a Premium Plus to Premium downgrade for the end of the current cycle.
+The billing UI displays pending plan changes and scheduled cancellations.
+Effective entitlements continue to follow signed Razorpay webhooks rather than
+optimistic browser responses. Razorpay does not permit a cancelled subscription
+to be reactivated; users can begin a new checkout after cancellation completes.
+
 ### API security and rate limiting
 
 Sensitive and resource-intensive endpoints use an atomic, Supabase-backed rate
@@ -255,6 +272,7 @@ supabase db push
 See `supabase/README.md` for the SQL editor alternative.
 The API security migration is required in every deployed environment; protected
 routes intentionally return `503` if the shared rate-limit store is unavailable.
+Apply the account and billing management migration before enabling plan changes.
 
 Create ₹199/month and ₹399/month plans in Razorpay, then add their plan IDs to
 the environment. Configure an HTTPS webhook pointing to
@@ -330,6 +348,8 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Protected admin user and subscription dashboard
 - [x] Distributed API rate limiting and security headers
 - [x] Playwright public-journey, security, and responsive browser tests
+- [x] Profile editing, password changes, and subscription-safe account deletion
+- [x] Razorpay subscription upgrades and scheduled downgrades
 
 ## Branch strategy
 

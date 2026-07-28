@@ -3,6 +3,7 @@ import { verifySignature } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json, SubscriptionRow } from "@/types/database";
 import { exceedsContentLength } from "@/lib/api-security";
+import { getPlanTierByRazorpayPlanId } from "@/lib/plans";
 
 type RazorpaySubscriptionEntity = {
   id?: string;
@@ -12,6 +13,9 @@ type RazorpaySubscriptionEntity = {
   ended_at?: number | null;
   notes?: Record<string, string>;
   plan_id?: string;
+  has_scheduled_changes?: boolean;
+  change_scheduled_at?: number | null;
+  cancel_at_cycle_end?: boolean;
 };
 
 type RazorpayWebhook = {
@@ -92,8 +96,10 @@ export async function POST(request: Request) {
   const entity = event.payload?.subscription?.entity;
   if (entity?.id) {
     const status = normalizeSubscriptionStatus(entity.status);
+    const effectivePlanTier = getPlanTierByRazorpayPlanId(entity.plan_id);
     const update = {
       status,
+      ...(effectivePlanTier ? { plan_tier: effectivePlanTier } : {}),
       razorpay_plan_id: entity.plan_id ?? null,
       current_period_start: entity.current_start
         ? new Date(entity.current_start * 1000).toISOString()
@@ -104,7 +110,20 @@ export async function POST(request: Request) {
       last_event_at: event.created_at
         ? new Date(event.created_at * 1000).toISOString()
         : new Date().toISOString(),
-      cancel_at_period_end: status === "cancelled",
+      ...(typeof entity.cancel_at_cycle_end === "boolean"
+        ? { cancel_at_period_end: entity.cancel_at_cycle_end }
+        : status === "cancelled"
+          ? { cancel_at_period_end: false }
+          : {}),
+      ...(entity.has_scheduled_changes === false
+        ? { scheduled_plan_tier: null, scheduled_change_at: null }
+        : entity.has_scheduled_changes === true
+          ? {
+            scheduled_change_at: entity.change_scheduled_at
+              ? new Date(entity.change_scheduled_at * 1000).toISOString()
+              : null,
+            }
+          : {}),
     };
     const { data: existing } = await admin
       .from("subscriptions")
@@ -136,6 +155,30 @@ export async function POST(request: Request) {
         userId &&
         (planTier === "premium" || planTier === "premium_plus")
       ) {
+        const { data: profile } = await admin
+          .from("profiles")
+          .select("id")
+          .eq("id", userId)
+          .maybeSingle();
+        if (!profile) {
+          const { error: deletedUserEventError } = await admin
+            .from("billing_events")
+            .insert({
+              event_id: eventId,
+              event_type: event.event ?? "unknown",
+              payload: JSON.parse(rawBody) as Json,
+            });
+          if (
+            deletedUserEventError &&
+            deletedUserEventError.code !== "23505"
+          ) {
+            return NextResponse.json(
+              { error: "Unable to process webhook." },
+              { status: 500 },
+            );
+          }
+          return NextResponse.json({ received: true, userDeleted: true });
+        }
         const { error: upsertError } = await admin.from("subscriptions").upsert(
           {
             ...update,

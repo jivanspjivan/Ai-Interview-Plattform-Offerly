@@ -33,3 +33,21 @@ export function getRazorpayPlanId(plan: Exclude<PlanTier, "basic">) {
     ? process.env.RAZORPAY_PREMIUM_PLAN_ID
     : process.env.RAZORPAY_PREMIUM_PLUS_PLAN_ID;
 }
+
+export function getPlanTierByRazorpayPlanId(planId: string | null | undefined) {
+  if (!planId) return null;
+  if (planId === process.env.RAZORPAY_PREMIUM_PLAN_ID) return "premium" as const;
+  if (planId === process.env.RAZORPAY_PREMIUM_PLUS_PLAN_ID) {
+    return "premium_plus" as const;
+  }
+  return null;
+}
+
+export function getPlanChangeTiming(
+  currentPlan: Exclude<PlanTier, "basic">,
+  nextPlan: Exclude<PlanTier, "basic">,
+) {
+  return planCatalog[nextPlan].price > planCatalog[currentPlan].price
+    ? ("now" as const)
+    : ("cycle_end" as const);
+}

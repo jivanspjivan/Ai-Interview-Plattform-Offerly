@@ -78,6 +78,8 @@ export type SubscriptionRow = {
   current_period_start: string | null;
   current_period_end: string | null;
   last_event_at: string | null;
+  scheduled_plan_tier: "premium" | "premium_plus" | null;
+  scheduled_change_at: string | null;
   cancel_at_period_end: boolean;
   created_at: string;
   updated_at: string;
@@ -156,6 +158,8 @@ export type Database = {
           | "current_period_start"
           | "current_period_end"
           | "last_event_at"
+          | "scheduled_plan_tier"
+          | "scheduled_change_at"
           | "cancel_at_period_end"
           | "created_at"
           | "updated_at"

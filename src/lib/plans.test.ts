@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   getRazorpayPlanId,
+  getPlanChangeTiming,
+  getPlanTierByRazorpayPlanId,
   isPaidPlan,
   planCatalog,
 } from "@/lib/plans";
@@ -41,5 +43,13 @@ describe("plan catalog", () => {
 
     expect(getRazorpayPlanId("premium")).toBe("plan_premium");
     expect(getRazorpayPlanId("premium_plus")).toBe("plan_plus");
+    expect(getPlanTierByRazorpayPlanId("plan_premium")).toBe("premium");
+    expect(getPlanTierByRazorpayPlanId("plan_plus")).toBe("premium_plus");
+    expect(getPlanTierByRazorpayPlanId("unknown")).toBeNull();
+  });
+
+  it("applies upgrades now and schedules downgrades for cycle end", () => {
+    expect(getPlanChangeTiming("premium", "premium_plus")).toBe("now");
+    expect(getPlanChangeTiming("premium_plus", "premium")).toBe("cycle_end");
   });
 });

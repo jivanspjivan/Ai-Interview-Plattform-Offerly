@@ -148,3 +148,72 @@ export function CancelSubscriptionButton({ className }: { className: string }) {
     </div>
   );
 }
+
+export function ChangePlanButton({
+  className,
+  currentPlan,
+  nextPlan,
+}: {
+  className: string;
+  currentPlan: Exclude<PlanTier, "basic">;
+  nextPlan: Exclude<PlanTier, "basic">;
+}) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const isUpgrade = currentPlan === "premium" && nextPlan === "premium_plus";
+
+  async function changePlan() {
+    const accepted = window.confirm(
+      isUpgrade
+        ? "Upgrade now? Razorpay may charge the prorated difference immediately."
+        : "Downgrade at the end of your current billing cycle?",
+    );
+    if (!accepted) return;
+    setIsLoading(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/billing/change", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: nextPlan }),
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        planName?: string;
+        timing?: "now" | "cycle_end";
+      };
+      if (!response.ok) {
+        throw new Error(result.error ?? "The plan could not be changed.");
+      }
+      setMessage(
+        result.timing === "now"
+          ? `Your ${result.planName} upgrade is being activated.`
+          : `Your ${result.planName} downgrade is scheduled for cycle end.`,
+      );
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Plan change failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <button
+        className={className}
+        disabled={isLoading}
+        onClick={changePlan}
+        type="button"
+      >
+        {isLoading
+          ? "Updating…"
+          : isUpgrade
+            ? "Upgrade to Premium Plus"
+            : "Downgrade to Premium"}
+      </button>
+      {message && <p role="status">{message}</p>}
+    </div>
+  );
+}

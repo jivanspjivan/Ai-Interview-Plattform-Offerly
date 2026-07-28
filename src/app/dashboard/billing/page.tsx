@@ -4,6 +4,7 @@ import { planCatalog, type PlanTier } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import {
   CancelSubscriptionButton,
+  ChangePlanButton,
   CheckoutButton,
 } from "@/components/billing-actions";
 import styles from "./billing.module.css";
@@ -71,6 +72,25 @@ export default async function BillingPage() {
             </strong>
           </div>
         )}
+        {subscription?.scheduled_plan_tier && (
+          <div>
+            <span>Pending plan change</span>
+            <strong>{planCatalog[subscription.scheduled_plan_tier].name}</strong>
+            <p>
+              {subscription.scheduled_change_at
+                ? `Expected ${new Intl.DateTimeFormat("en-IN", {
+                    dateStyle: "medium",
+                  }).format(new Date(subscription.scheduled_change_at))}`
+                : "Waiting for Razorpay confirmation"}
+            </p>
+          </div>
+        )}
+        {subscription?.cancel_at_period_end && (
+          <div>
+            <span>Cancellation scheduled</span>
+            <strong>Access continues until period end</strong>
+          </div>
+        )}
         {isPaidActive && !subscription.cancel_at_period_end && (
           <CancelSubscriptionButton className={styles.cancelButton} />
         )}
@@ -114,6 +134,21 @@ export default async function BillingPage() {
               </ul>
               {tier === plan ? (
                 <p className={styles.activeLabel}>Current plan</p>
+              ) : subscription?.scheduled_plan_tier === plan ? (
+                <p className={styles.activeLabel}>Change scheduled</p>
+              ) : isPaidActive ? (
+                subscription.cancel_at_period_end ||
+                subscription.scheduled_plan_tier ? (
+                  <p className={styles.unavailableLabel}>
+                    Resolve the pending billing change first
+                  </p>
+                ) : (
+                  <ChangePlanButton
+                    className={styles.checkoutButton}
+                    currentPlan={tier as Exclude<PlanTier, "basic">}
+                    nextPlan={plan}
+                  />
+                )
               ) : (
                 <CheckoutButton className={styles.checkoutButton} plan={plan} />
               )}
