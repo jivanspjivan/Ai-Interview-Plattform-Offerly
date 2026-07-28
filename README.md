@@ -33,8 +33,7 @@ it can be replaced with a verified customer review.
 ### Account and plan pages
 
 Offerly now includes responsive `/login`, `/register`, and `/plans` routes.
-The pricing page presents Basic, Premium, and Premium Plus tiers and explicitly
-states that payments are not active.
+The pricing page presents Basic, Premium, and Premium Plus tiers.
 
 Authentication is integrated with Supabase SSR. Email/password registration,
 login, Google OAuth, email verification callbacks, password recovery, secure
@@ -76,6 +75,19 @@ related records after confirmation.
 weakest skills, recent score movement, role-level averages, and seven-day
 practice activity from the user’s saved data. Loading and empty states keep both
 areas useful before the first session is recorded.
+
+### Razorpay subscriptions and plan limits
+
+The authenticated `/dashboard/billing` page displays the current plan, monthly
+session and feedback usage, paid-plan choices, billing period, and cancellation
+controls. Razorpay Subscriptions checkout is created server-side, the immediate
+checkout response is verified with HMAC, and raw-body webhooks are validated and
+deduplicated before subscription access changes.
+
+Basic accounts receive three saved practice sessions and three AI feedback
+reports per calendar month. Active Premium and Premium Plus subscriptions remove
+those limits. Paid access is granted only after an `active` subscription webhook
+has been verified.
 
 ### AI interview feedback
 
@@ -177,6 +189,12 @@ Copy `.env.example` to `.env.local` and configure:
 OPENAI_API_KEY=your_openai_api_key
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_your_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_separate_webhook_secret
+RAZORPAY_PREMIUM_PLAN_ID=plan_your_premium_plan_id
+RAZORPAY_PREMIUM_PLUS_PLAN_ID=plan_your_premium_plus_plan_id
 ```
 
 In Supabase Auth URL Configuration, set the site URL to the application origin
@@ -192,6 +210,12 @@ supabase db push
 ```
 
 See `supabase/README.md` for the SQL editor alternative.
+
+Create ₹199/month and ₹399/month plans in Razorpay, then add their plan IDs to
+the environment. Configure an HTTPS webhook pointing to
+`/api/webhooks/razorpay` with a separate webhook secret and subscribe to the
+subscription lifecycle events. Test the full flow with Razorpay Test Mode keys
+before using Live Mode.
 
 ## Available scripts
 
@@ -242,6 +266,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Responsive authenticated dashboard and account summary
 - [x] Supabase persistence schema, RLS, and saved interview data
 - [x] Session history and progress tracking
+- [x] Razorpay subscription checkout, billing, and plan limits
 
 ## Branch strategy
 

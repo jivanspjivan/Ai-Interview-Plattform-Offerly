@@ -19,6 +19,7 @@ export default async function DashboardLayout({
           <Link href="/dashboard">Overview</Link>
           <Link href="/dashboard/history">History</Link>
           <Link href="/dashboard/progress">Progress</Link>
+          <Link href="/dashboard/billing">Billing</Link>
           <Link href="/dashboard/account">Account</Link>
         </div>
         <div className={styles.accountActions}>

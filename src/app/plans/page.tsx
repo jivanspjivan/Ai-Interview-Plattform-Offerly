@@ -37,7 +37,7 @@ const plans = [
       "Priority transcription",
     ],
     action: "Choose Premium",
-    href: "/register?plan=premium",
+    href: "/dashboard/billing?plan=premium",
     featured: true,
   },
   {
@@ -54,7 +54,7 @@ const plans = [
       "Personalized improvement plans",
     ],
     action: "Choose Premium Plus",
-    href: "/register?plan=premium-plus",
+    href: "/dashboard/billing?plan=premium_plus",
     plus: true,
   },
 ];

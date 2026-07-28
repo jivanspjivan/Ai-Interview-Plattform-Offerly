@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { InterviewSession } from "@/components/interview-session";
+import { hasSupabaseConfig } from "@/lib/supabase/config";
+import { currentMonthStart, getEntitlements } from "@/lib/entitlements";
+import { createClient } from "@/lib/supabase/server";
 import {
   isExperienceLevel,
   isInterviewDuration,
@@ -36,6 +39,32 @@ export default async function InterviewSessionPage({
     !isInterviewDuration(duration)
   ) {
     redirect("/interview/new");
+  }
+
+  if (hasSupabaseConfig()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      redirect(`/login?next=${encodeURIComponent(`/interview/session?${new URLSearchParams({
+        role,
+        type: interviewType,
+        experience,
+        duration: String(duration),
+      }).toString()}`)}`);
+    }
+    const entitlements = await getEntitlements(supabase, user.id);
+    if (entitlements.monthlySessionLimit !== null) {
+      const { count } = await supabase
+        .from("interview_sessions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", currentMonthStart());
+      if ((count ?? 0) >= entitlements.monthlySessionLimit) {
+        redirect("/dashboard/billing?limit=session");
+      }
+    }
   }
 
   return (

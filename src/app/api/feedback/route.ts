@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import type { InterviewFeedback } from "@/types/interview-feedback";
+import { hasSupabaseConfig } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/server";
+import { currentMonthStart, getEntitlements } from "@/lib/entitlements";
 
 const MAX_TRANSCRIPT_LENGTH = 12_000;
 
@@ -102,6 +105,36 @@ export async function POST(request: Request) {
       { error: "Role, level, question, and transcript are required." },
       { status: 400 },
     );
+  }
+
+  if (hasSupabaseConfig()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Log in to generate and save AI feedback." },
+        { status: 401 },
+      );
+    }
+    const entitlements = await getEntitlements(supabase, user.id);
+    if (entitlements.monthlyFeedbackLimit !== null) {
+      const { count } = await supabase
+        .from("interview_feedback")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", currentMonthStart());
+      if ((count ?? 0) >= entitlements.monthlyFeedbackLimit) {
+        return NextResponse.json(
+          {
+            error: `Your ${entitlements.name} plan includes ${entitlements.monthlyFeedbackLimit} AI feedback reports each month.`,
+            upgradeUrl: "/dashboard/billing",
+          },
+          { status: 402 },
+        );
+      }
+    }
   }
 
   try {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { currentMonthStart, getEntitlements } from "@/lib/entitlements";
 import {
   isExperienceLevel,
   isInterviewDuration,
@@ -66,6 +67,24 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  const entitlements = await getEntitlements(supabase, user.id);
+  if (entitlements.monthlySessionLimit !== null) {
+    const { count } = await supabase
+      .from("interview_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", currentMonthStart());
+    if ((count ?? 0) >= entitlements.monthlySessionLimit) {
+      return NextResponse.json(
+        {
+          error: `Your ${entitlements.name} plan includes ${entitlements.monthlySessionLimit} sessions each month.`,
+          upgradeUrl: "/dashboard/billing",
+        },
+        { status: 402 },
+      );
+    }
   }
 
   const { data, error } = await supabase
