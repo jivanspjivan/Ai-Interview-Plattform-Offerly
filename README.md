@@ -34,8 +34,13 @@ it can be replaced with a verified customer review.
 
 Offerly now includes responsive `/login`, `/register`, and `/plans` routes.
 The pricing page presents Basic, Premium, and Premium Plus tiers and explicitly
-states that payments are not active. Authentication forms are intentionally not
-connected until Supabase project credentials are configured.
+states that payments are not active.
+
+Authentication is integrated with Supabase SSR. Email/password registration,
+login, Google OAuth, email verification callbacks, password recovery, secure
+cookie refresh, logout, guest-only redirects, and the protected `/dashboard`
+route are implemented. The flows become active after Supabase project
+credentials and provider settings are configured.
 
 ### AI interview feedback
 
@@ -131,6 +136,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Copy `.env.example` to `.env.local` and configure:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+```
+
+In Supabase Auth URL Configuration, set the site URL to the application origin
+and allow `/auth/callback` as a redirect URL. Enable the Google provider and add
+its OAuth credentials before using “Continue with Google.” Keep email
+confirmation enabled for the verification flow.
+
 ## Available scripts
 
 ```bash
@@ -176,6 +194,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Responsive UI polish and accessible homepage animations
 - [x] Sticky navigation and expanded footer
 - [x] Illustrative company preparation showcase
+- [x] Supabase authentication and protected dashboard foundation
 - [ ] Session history and progress tracking
 
 ## Branch strategy

@@ -80,12 +80,19 @@
   font: inherit;
   font-size: 0.74rem;
   font-weight: 750;
-  cursor: not-allowed;
+  cursor: pointer;
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     transform 220ms ease;
+}
+
+.googleButton:disabled,
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.68;
+  transform: none;
 }
 
 .googleButton:hover {
@@ -358,6 +365,11 @@
   color: #5f704d;
   font-size: 0.65rem;
   line-height: 1.5;
+}
+
+.errorMessage {
+  background: #f8e9e5;
+  color: #8a3f32;
 }
 
 .switchMode {

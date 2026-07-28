@@ -1,22 +1,123 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import styles from "./auth-form.module.css";
 
 type AuthFormProps = {
   mode: "login" | "register";
+  initialMessage?: string;
 };
 
-export function AuthForm({ mode }: AuthFormProps) {
-  const [message, setMessage] = useState("");
+function friendlyError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return "Something went wrong. Please try again.";
+  }
+
+  if (error.message.includes("Supabase is not configured")) {
+    return "Account access is not configured yet. Add the Supabase environment variables to continue.";
+  }
+
+  if (/invalid login credentials/i.test(error.message)) {
+    return "The email or password is incorrect.";
+  }
+
+  if (/user already registered/i.test(error.message)) {
+    return "An account already exists for this email. Try logging in.";
+  }
+
+  if (/email rate limit/i.test(error.message)) {
+    return "Too many email requests. Please wait a few minutes and try again.";
+  }
+
+  return error.message;
+}
+
+function getSafeNextPath() {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+}
+
+export function AuthForm({ mode, initialMessage = "" }: AuthFormProps) {
+  const router = useRouter();
+  const [message, setMessage] = useState(initialMessage);
+  const [messageKind, setMessageKind] = useState<"error" | "success">(
+    initialMessage ? "error" : "success",
+  );
+  const [isLoading, setIsLoading] = useState(false);
   const isRegister = mode === "register";
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage(
-      "The page is ready. Connect Supabase to enable secure account access.",
-    );
+    setMessage("");
+    setIsLoading(true);
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    const fullName = String(formData.get("name") ?? "").trim();
+
+    try {
+      const supabase = createClient();
+
+      if (isRegister) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          },
+        });
+
+        if (error) throw error;
+
+        if (!data.session) {
+          setMessageKind("success");
+          setMessage(
+            "Check your email to verify your account, then return to log in.",
+          );
+          return;
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+      }
+
+      router.push(getSafeNextPath());
+      router.refresh();
+    } catch (error) {
+      setMessageKind("error");
+      setMessage(friendlyError(error));
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const supabase = createClient();
+      const next = getSafeNextPath();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) throw error;
+    } catch (error) {
+      setMessageKind("error");
+      setMessage(friendlyError(error));
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -36,9 +137,14 @@ export function AuthForm({ mode }: AuthFormProps) {
         </span>
       </div>
 
-      <button className={styles.googleButton} type="button" disabled>
+      <button
+        className={styles.googleButton}
+        type="button"
+        disabled={isLoading}
+        onClick={handleGoogleLogin}
+      >
         <span aria-hidden="true">G</span>
-        Continue with Google
+        {isLoading ? "Please wait…" : "Continue with Google"}
       </button>
 
       <div className={styles.divider}>
@@ -76,7 +182,14 @@ export function AuthForm({ mode }: AuthFormProps) {
       <div className={styles.field}>
         <div className={styles.labelRow}>
           <label htmlFor="password">Password</label>
-          {!isRegister && <button type="button">Forgot password?</button>}
+          {!isRegister && (
+            <button
+              type="button"
+              onClick={() => router.push("/forgot-password")}
+            >
+              Forgot password?
+            </button>
+          )}
         </div>
         <input
           id="password"
@@ -99,13 +212,26 @@ export function AuthForm({ mode }: AuthFormProps) {
         </label>
       )}
 
-      <button className={styles.submitButton} type="submit">
-        {isRegister ? "Create account" : "Log in"}
+      <button
+        className={styles.submitButton}
+        type="submit"
+        disabled={isLoading}
+      >
+        {isLoading
+          ? "Please wait…"
+          : isRegister
+            ? "Create account"
+            : "Log in"}
         <span aria-hidden="true">→</span>
       </button>
 
       {message && (
-        <p className={styles.message} role="status">
+        <p
+          className={`${styles.message} ${
+            messageKind === "error" ? styles.errorMessage : ""
+          }`}
+          role={messageKind === "error" ? "alert" : "status"}
+        >
           {message}
         </p>
       )}

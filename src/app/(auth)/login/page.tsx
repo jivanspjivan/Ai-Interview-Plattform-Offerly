@@ -8,7 +8,21 @@ export const metadata: Metadata = {
   description: "Log in to continue your interview practice.",
 };
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+const errorMessages: Record<string, string> = {
+  configuration:
+    "Account access is not configured yet. Add the Supabase environment variables to continue.",
+  verification:
+    "We could not verify that authentication link. Request a new link and try again.",
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const errorCode = typeof params.error === "string" ? params.error : "";
+
   return (
     <main className={styles.page}>
       <nav className={styles.nav} aria-label="Account navigation">
@@ -107,7 +121,10 @@ export default function LoginPage() {
             </div>
           </div>
         </section>
-        <AuthForm mode="login" />
+          <AuthForm
+            mode="login"
+            initialMessage={errorMessages[errorCode] ?? ""}
+          />
       </div>
     </main>
   );
