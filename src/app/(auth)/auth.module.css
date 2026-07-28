@@ -8,13 +8,19 @@
 }
 
 .nav {
+  position: sticky;
+  z-index: 100;
+  top: 0;
   width: min(1180px, calc(100% - 48px));
   height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-inline: auto;
-  border-bottom: 1px solid #dedfd8;
+  border-bottom: 1px solid rgba(93, 109, 100, 0.14);
+  background: rgba(248, 248, 248, 0.94);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(31, 56, 45, 0.08);
 }
 
 .brand {

@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { TestimonialBrowser } from "@/components/testimonial-browser";
+import { AnimatedCoachCard } from "@/components/animated-coach-card";
+import { ScrollRevealSection } from "@/components/scroll-reveal-section";
 
 const ArrowIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 20 20">
@@ -13,18 +16,106 @@ const SparkIcon = () => (
   </svg>
 );
 
-const CheckIcon = () => (
-  <svg aria-hidden="true" viewBox="0 0 20 20">
-    <path d="m4 10 4 4 8-9" />
-  </svg>
-);
-
 const ShieldCheckIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24">
     <path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6l-7-3Z" />
     <path d="m9 12 2 2 4-4" />
   </svg>
 );
+
+const FooterIcon = ({
+  kind,
+}: {
+  kind:
+    | "practice"
+    | "steps"
+    | "plans"
+    | "login"
+    | "register"
+    | "linkedin"
+    | "instagram"
+    | "x"
+    | "youtube";
+}) => {
+  if (kind === "practice") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <path d="M10 13a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v4a3 3 0 0 0 3 3Z" />
+        <path d="M5 10a5 5 0 0 0 10 0M10 15v3M7 18h6" />
+      </svg>
+    );
+  }
+
+  if (kind === "steps") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <circle cx="5" cy="5" r="2" />
+        <circle cx="15" cy="10" r="2" />
+        <circle cx="5" cy="15" r="2" />
+        <path d="M7 5h3l3 3M13 12l-3 3H7" />
+      </svg>
+    );
+  }
+
+  if (kind === "plans") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <rect x="3" y="4" width="14" height="12" rx="2" />
+        <path d="M3 8h14M7 12h3" />
+      </svg>
+    );
+  }
+
+  if (kind === "login") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <path d="M8 4H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3M11 6l4 4-4 4M6 10h9" />
+      </svg>
+    );
+  }
+
+  if (kind === "register") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <circle cx="8" cy="7" r="3" />
+        <path d="M3 17c.5-3 2.2-5 5-5s4.5 2 5 5M15 6v5M12.5 8.5h5" />
+      </svg>
+    );
+  }
+
+  if (kind === "instagram") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <rect x="3" y="3" width="14" height="14" rx="4" />
+        <circle cx="10" cy="10" r="3" />
+        <path d="M14.5 5.5h.01" />
+      </svg>
+    );
+  }
+
+  if (kind === "youtube") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <path d="M17 7.2v5.6c0 1.2-.8 2-2 2.2-3.3.4-6.7.4-10 0-1.2-.2-2-1-2-2.2V7.2C3 6 3.8 5.2 5 5c3.3-.4 6.7-.4 10 0 1.2.2 2 1 2 2.2Z" />
+        <path d="m8.5 8 4 2-4 2V8Z" />
+      </svg>
+    );
+  }
+
+  if (kind === "linkedin") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 20 20">
+        <path d="M5 8v7M5 5.5v.01M9 15V8m0 3c.7-2 5-2.3 5 1v3" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20">
+      <path d="m4 4 12 12M16 4 4 16" />
+    </svg>
+  );
+};
 
 const features = [
   {
@@ -130,6 +221,9 @@ export default function Home() {
           offerly
         </a>
         <div className="nav-actions">
+          <Link className="text-link nav-home-link" href="/">
+            Home
+          </Link>
           <a className="text-link" href="#how-it-works">
             How it works
           </a>
@@ -155,8 +249,8 @@ export default function Home() {
             Your private interview room
           </p>
           <h1>
-            Great answers are
-            <span>built, not memorized.</span>
+            <span className="hero-line">Great answers are</span>
+            <span className="hero-line">built, not memorized.</span>
           </h1>
           <p className="hero-description">
             Practice the questions that matter, speak with confidence, and get
@@ -174,50 +268,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="coach-card" aria-label="Example coaching feedback">
-          <div className="card-topbar">
-            <div className="window-dots" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <p>Live practice</p>
-            <span className="live-indicator">
-              <i aria-hidden="true" />
-              Live
-            </span>
-          </div>
-          <div className="question-panel">
-            <span className="question-label">Question 03 of 08</span>
-            <h2>Tell me about a time you handled a difficult stakeholder.</h2>
-            <div className="answer-wave" aria-hidden="true">
-              {[18, 29, 15, 38, 48, 24, 34, 58, 42, 22, 51, 65, 31, 45, 20].map(
-                (height, index) => (
-                  <span key={index} style={{ height }} />
-                ),
-              )}
-            </div>
-            <p className="recording-time">01:24</p>
-          </div>
-          <div className="feedback-panel">
-            <div className="score">
-              <strong>84</strong>
-              <span>/ 100</span>
-            </div>
-            <div>
-              <p className="feedback-title">Strong answer</p>
-              <p className="feedback-copy">
-                Your example was specific and your ownership was clear.
-              </p>
-            </div>
-          </div>
-          <div className="feedback-note">
-            <span>
-              <CheckIcon />
-            </span>
-            Add a measurable result to make the impact memorable.
-          </div>
-        </div>
+        <AnimatedCoachCard />
       </section>
 
       <section className="proof">
@@ -234,18 +285,14 @@ export default function Home() {
       </section>
 
       <section className="testimonials shell" aria-labelledby="stories-heading">
-        <div className="section-heading testimonials-heading">
-          <p className="eyebrow">Illustrative candidate stories</p>
-          <h2 id="stories-heading">See what focused practice can change.</h2>
-          <p className="testimonial-disclaimer">
-            Illustrative examples of the intended Offerly experience. Profiles
-            and portraits are fictional.
-          </p>
-        </div>
         <TestimonialBrowser />
       </section>
 
-      <section className="process shell" id="how-it-works">
+      <ScrollRevealSection
+        className="process shell"
+        id="how-it-works"
+        visibleClassName="process-visible"
+      >
         <div className="section-heading">
           <p className="eyebrow">A better practice loop</p>
           <h2>From nervous to ready, one answer at a time.</h2>
@@ -275,7 +322,7 @@ export default function Home() {
             <ArrowIcon />
           </a>
         </div>
-      </section>
+      </ScrollRevealSection>
 
       <footer className="site-footer">
         <div className="shell footer-inner">
@@ -295,19 +342,64 @@ export default function Home() {
           <nav className="footer-links" aria-label="Footer navigation">
             <div>
               <strong>Practice</strong>
-              <a href="/interview/new">Start an interview</a>
-              <a href="#how-it-works">How it works</a>
-              <a href="/plans">Plans</a>
+              <a href="/interview/new">
+                <FooterIcon kind="practice" />
+                Start an interview
+              </a>
+              <a href="#how-it-works">
+                <FooterIcon kind="steps" />
+                How it works
+              </a>
+              <a href="/plans">
+                <FooterIcon kind="plans" />
+                Plans
+              </a>
             </div>
             <div>
               <strong>Account</strong>
-              <a href="/login">Log in</a>
-              <a href="/register">Create account</a>
+              <a href="/login">
+                <FooterIcon kind="login" />
+                Log in
+              </a>
+              <a href="/register">
+                <FooterIcon kind="register" />
+                Create account
+              </a>
+            </div>
+            <div>
+              <strong>Follow</strong>
+              <a
+                href="https://www.linkedin.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FooterIcon kind="linkedin" />
+                LinkedIn
+              </a>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FooterIcon kind="instagram" />
+                Instagram
+              </a>
+              <a href="https://x.com" target="_blank" rel="noreferrer">
+                <FooterIcon kind="x" />X / Twitter
+              </a>
+              <a
+                href="https://www.youtube.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FooterIcon kind="youtube" />
+                YouTube
+              </a>
             </div>
           </nav>
         </div>
         <div className="shell footer-bottom">
-          <p>© 2026 Offerly. Private practice for better interviews.</p>
+          <p>© 2026 Offerly. All rights reserved.</p>
           <a href="/interview/new">
             Start practicing
             <ArrowIcon />

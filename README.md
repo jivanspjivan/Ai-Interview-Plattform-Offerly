@@ -8,6 +8,21 @@ here so the repository history remains easy to follow and useful for learning.
 
 ## Current features
 
+### Polished responsive product experience
+
+The public experience now includes a refined responsive homepage, sticky
+navigation across the main routes, and a compact three-column footer with
+practice, account, and social destinations. The homepage uses accessible,
+reduced-motion-aware interactions for its hero coaching preview, testimonial
+gallery, company showcase, and step-by-step practice flow.
+
+The animated coaching preview demonstrates a live answer waveform, timer,
+progressive feedback, and a score count-up. Illustrative reviews reveal as they
+enter the viewport and can be filtered by role area. A two-row company showcase
+presents 35 illustrative preparation targets across product, enterprise, IT
+services, startup, and fintech categories; these examples are not placement
+claims.
+
 ### Illustrative testimonial gallery
 
 The landing page includes a responsive 15-card testimonial preview with ten
@@ -158,6 +173,9 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Answer recording
 - [x] Answer transcription
 - [x] AI-generated feedback
+- [x] Responsive UI polish and accessible homepage animations
+- [x] Sticky navigation and expanded footer
+- [x] Illustrative company preparation showcase
 - [ ] Session history and progress tracking
 
 ## Branch strategy
