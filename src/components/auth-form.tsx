@@ -48,6 +48,8 @@ export function AuthForm({ mode, initialMessage = "" }: AuthFormProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
   const isRegister = mode === "register";
+  const googleAuthEnabled =
+    process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -137,19 +139,23 @@ export function AuthForm({ mode, initialMessage = "" }: AuthFormProps) {
         </span>
       </div>
 
-      <button
-        className={styles.googleButton}
-        type="button"
-        disabled={isLoading}
-        onClick={handleGoogleLogin}
-      >
-        <span aria-hidden="true">G</span>
-        {isLoading ? "Please wait…" : "Continue with Google"}
-      </button>
+      {googleAuthEnabled && (
+        <>
+          <button
+            className={styles.googleButton}
+            type="button"
+            disabled={isLoading}
+            onClick={handleGoogleLogin}
+          >
+            <span aria-hidden="true">G</span>
+            {isLoading ? "Please wait…" : "Continue with Google"}
+          </button>
 
-      <div className={styles.divider}>
-        <span>or use email</span>
-      </div>
+          <div className={styles.divider}>
+            <span>or use email</span>
+          </div>
+        </>
+      )}
 
       {isRegister && (
         <div className={styles.field}>
