@@ -254,6 +254,62 @@
   font-weight: 750;
 }
 
+.sessionList {
+  display: grid;
+  gap: 9px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessionList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 13px;
+  border: 1px solid #e0e4dc;
+  border-radius: 11px;
+  background: #f8f8f3;
+}
+
+.sessionList strong,
+.sessionList span {
+  display: block;
+}
+
+.sessionList strong {
+  color: #2d3e34;
+  font-size: 0.72rem;
+}
+
+.sessionList span,
+.sessionList time {
+  margin-top: 3px;
+  color: #6b766f;
+  font-size: 0.58rem;
+  text-transform: capitalize;
+}
+
+.averageScore {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.averageScore strong {
+  color: #31472b;
+  font-size: 3rem;
+  letter-spacing: -0.06em;
+}
+
+.averageScore span {
+  color: #667269;
+  font-size: 0.65rem;
+  font-weight: 750;
+}
+
 .accountPage {
   width: min(900px, calc(100% - 48px));
   margin: 75px auto 0;

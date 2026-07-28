@@ -51,6 +51,19 @@ features. `/dashboard/account` displays the verified Supabase identity,
 sign-in method, and account creation date while profile editing remains reserved
 for the database milestone.
 
+### Interview persistence
+
+The Supabase migration in `supabase/migrations` defines user profiles, interview
+sessions, answers, and structured feedback with indexes, automatic timestamps,
+profile creation, and owner-only Row Level Security. Signed-in practice sessions
+are created automatically; transcripts and AI feedback are upserted per
+question, and sessions are marked completed or abandoned.
+
+The dashboard reads saved session totals, current practice streak, recent
+sessions, and average feedback scores from Supabase. Practice still works
+without persistence when the database is not configured or the user is signed
+out.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -158,6 +171,15 @@ and allow `/auth/callback` as a redirect URL. Enable the Google provider and add
 its OAuth credentials before using “Continue with Google.” Keep email
 confirmation enabled for the verification flow.
 
+Apply the database migration after linking the Supabase CLI:
+
+```bash
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push
+```
+
+See `supabase/README.md` for the SQL editor alternative.
+
 ## Available scripts
 
 ```bash
@@ -205,6 +227,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Illustrative company preparation showcase
 - [x] Supabase authentication and protected dashboard foundation
 - [x] Responsive authenticated dashboard and account summary
+- [x] Supabase persistence schema, RLS, and saved interview data
 - [ ] Session history and progress tracking
 
 ## Branch strategy

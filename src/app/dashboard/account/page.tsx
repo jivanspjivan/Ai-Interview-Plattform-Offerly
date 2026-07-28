@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import styles from "../dashboard.module.css";
 
 export const metadata: Metadata = {
@@ -10,10 +11,17 @@ export const metadata: Metadata = {
 
 export default async function AccountPage() {
   const user = await requireUser();
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
   const displayName =
-    typeof user.user_metadata.full_name === "string"
+    profile?.full_name ??
+    (typeof user.user_metadata.full_name === "string"
       ? user.user_metadata.full_name
-      : "Not provided";
+      : "Not provided");
   const provider =
     typeof user.app_metadata.provider === "string"
       ? user.app_metadata.provider
@@ -55,10 +63,10 @@ export default async function AccountPage() {
 
       <div className={styles.settingsNotice}>
         <div>
-          <strong>Profile editing arrives with the user profile database.</strong>
+          <strong>Your profile is connected to the Offerly database.</strong>
           <p>
-            Phase 4 will add editable profile fields and persistent interview
-            preferences.
+            Editing profile fields and persistent interview preferences can be
+            added as the account experience expands.
           </p>
         </div>
         <Link href="/dashboard">Back to overview</Link>

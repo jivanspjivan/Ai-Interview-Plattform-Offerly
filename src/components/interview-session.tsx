@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnswerRecorder } from "@/components/answer-recorder";
 import { getQuestions } from "@/data/interview-questions";
 import type { InterviewFeedback } from "@/types/interview-feedback";
@@ -26,7 +26,10 @@ function formatTime(totalSeconds: number) {
 }
 
 export function InterviewSession({ setup }: InterviewSessionProps) {
-  const questions = getQuestions(setup.interviewType);
+  const questions = useMemo(
+    () => getQuestions(setup.interviewType),
+    [setup.interviewType],
+  );
   const [questionIndex, setQuestionIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
@@ -34,6 +37,33 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
     Record<string, AnswerRecording>
   >({});
   const [isRecording, setIsRecording] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionCreationStarted = useRef(false);
+
+  const createPersistedSession = useCallback(async () => {
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...setup,
+          questionCount: questions.length,
+        }),
+      });
+      const result = (await response.json()) as { sessionId?: string };
+      if (response.ok && result.sessionId) {
+        setSessionId(result.sessionId);
+      }
+    } catch {
+      // Practice remains available when persistence is offline.
+    }
+  }, [questions.length, setup]);
+
+  useEffect(() => {
+    if (sessionCreationStarted.current) return;
+    sessionCreationStarted.current = true;
+    void createPersistedSession();
+  }, [createPersistedSession]);
 
   useEffect(() => {
     if (isComplete) return;
@@ -49,6 +79,70 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
   const handleRecordingChange = useCallback((recording: boolean) => {
     setIsRecording(recording);
   }, []);
+
+  const persistAnswer = useCallback(
+    async (
+      questionId: string,
+      questionPrompt: string,
+      questionType: "behavioral" | "technical",
+      transcript: string,
+      feedback?: InterviewFeedback,
+    ) => {
+      if (!sessionId) return;
+
+      try {
+        await fetch(`/api/sessions/${sessionId}/answers`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            questionId,
+            questionPrompt,
+            questionType,
+            transcript,
+            feedback,
+          }),
+        });
+      } catch {
+        // The local session remains usable if a save request fails.
+      }
+    },
+    [sessionId],
+  );
+
+  const finishPersistedSession = useCallback(
+    async (status: "completed" | "abandoned") => {
+      if (!sessionId) return;
+
+      try {
+        await fetch(`/api/sessions/${sessionId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status, elapsedSeconds }),
+          keepalive: status === "abandoned",
+        });
+      } catch {
+        // Completion UI should not be blocked by a persistence failure.
+      }
+    },
+    [elapsedSeconds, sessionId],
+  );
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    Object.entries(recordings).forEach(([questionId, answer]) => {
+      if (!answer.transcript) return;
+      const savedQuestion = questions.find((item) => item.id === questionId);
+      if (!savedQuestion) return;
+      void persistAnswer(
+        savedQuestion.id,
+        savedQuestion.prompt,
+        savedQuestion.type,
+        answer.transcript,
+        answer.feedback,
+      );
+    });
+  }, [persistAnswer, questions, recordings, sessionId]);
 
   if (isComplete) {
     return (
@@ -134,6 +228,8 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
                   URL.revokeObjectURL(recording.url),
                 );
                 setRecordings({});
+                setSessionId(null);
+                void createPersistedSession();
               }}
             >
               <span aria-hidden="true">↻</span>
@@ -144,7 +240,7 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
               Create a new plan
             </Link>
           </div>
-          <Link className={styles.dashboardLink} href="/">
+          <Link className={styles.dashboardLink} href="/dashboard">
             <span>Go to dashboard</span>
             <span aria-hidden="true">→</span>
           </Link>
@@ -165,7 +261,11 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
           <span>•</span>
           <span>{setup.experience}</span>
         </div>
-        <Link className={styles.exitLink} href="/interview/new">
+        <Link
+          className={styles.exitLink}
+          href="/interview/new"
+          onClick={() => void finishPersistedSession("abandoned")}
+        >
           <span>Exit session</span>
           <span aria-hidden="true">↗</span>
         </Link>
@@ -219,24 +319,40 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
               })
             }
             onRecordingChange={handleRecordingChange}
-            onTranscriptChange={(transcript) =>
+            onTranscriptChange={(transcript) => {
               setRecordings((current) => ({
                 ...current,
                 [question.id]: {
                   ...current[question.id],
                   transcript,
                 },
-              }))
-            }
-            onFeedbackChange={(feedback) =>
+              }));
+              void persistAnswer(
+                question.id,
+                question.prompt,
+                question.type,
+                transcript,
+              );
+            }}
+            onFeedbackChange={(feedback) => {
               setRecordings((current) => ({
                 ...current,
                 [question.id]: {
                   ...current[question.id],
                   feedback,
                 },
-              }))
-            }
+              }));
+              const transcript = recordings[question.id]?.transcript;
+              if (transcript) {
+                void persistAnswer(
+                  question.id,
+                  question.prompt,
+                  question.type,
+                  transcript,
+                  feedback,
+                );
+              }
+            }}
           />
           <aside className={styles.guidance}>
             <strong>
@@ -265,6 +381,7 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
             onClick={() => {
               if (questionIndex === questions.length - 1) {
                 setIsComplete(true);
+                void finishPersistedSession("completed");
               } else {
                 setQuestionIndex((current) => current + 1);
               }
