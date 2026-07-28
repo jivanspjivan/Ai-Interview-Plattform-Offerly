@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { isAdminEmail, requireUser } from "@/lib/auth";
 import { signOut } from "./actions";
 import styles from "./dashboard.module.css";
 
@@ -21,6 +21,9 @@ export default async function DashboardLayout({
           <Link href="/dashboard/progress">Progress</Link>
           <Link href="/dashboard/billing">Billing</Link>
           <Link href="/dashboard/account">Account</Link>
+          {isAdminEmail(user.email) && (
+            <Link href="/dashboard/admin">Admin</Link>
+          )}
         </div>
         <div className={styles.accountActions}>
           <span>{user.email}</span>

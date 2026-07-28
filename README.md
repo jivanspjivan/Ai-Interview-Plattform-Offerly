@@ -97,6 +97,15 @@ Razorpay HMAC verification, subscription-status normalization, and out-of-order
 webhook handling. Run it with `npm test`, or use `npm run test:watch` while
 developing.
 
+### Admin user dashboard
+
+Allowlisted administrators can open `/dashboard/admin` to review total users,
+active subscribers, paid subscription records, and free accounts. The
+searchable, paginated user table shows account availability, current plan,
+subscription lifecycle status, interview count, join date, and last sign-in.
+The page uses the Supabase service role only on the server and redirects
+non-admin users back to their dashboard.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -198,6 +207,7 @@ OPENAI_API_KEY=your_openai_api_key
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+ADMIN_EMAILS=admin@example.com
 NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_your_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 RAZORPAY_WEBHOOK_SECRET=your_separate_webhook_secret
@@ -224,6 +234,10 @@ the environment. Configure an HTTPS webhook pointing to
 `/api/webhooks/razorpay` with a separate webhook secret and subscribe to the
 subscription lifecycle events. Test the full flow with Razorpay Test Mode keys
 before using Live Mode.
+
+Set `ADMIN_EMAILS` to a comma-separated list of administrator account email
+addresses. These accounts must also be registered in Supabase. Never expose the
+Supabase service-role key through a `NEXT_PUBLIC_` environment variable.
 
 ## Available scripts
 
@@ -278,6 +292,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Session history and progress tracking
 - [x] Razorpay subscription checkout, billing, and plan limits
 - [x] Automated billing and entitlement reliability tests
+- [x] Protected admin user and subscription dashboard
 
 ## Branch strategy
 

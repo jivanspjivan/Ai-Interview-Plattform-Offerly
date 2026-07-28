@@ -19,3 +19,20 @@ export const requireUser = cache(async () => {
 
   return user;
 });
+
+export function isAdminEmail(email: string | null | undefined) {
+  if (!email) return false;
+  const allowedEmails = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  return allowedEmails.includes(email.toLowerCase());
+}
+
+export const requireAdmin = cache(async () => {
+  const user = await requireUser();
+  if (!isAdminEmail(user.email)) {
+    redirect("/dashboard");
+  }
+  return user;
+});

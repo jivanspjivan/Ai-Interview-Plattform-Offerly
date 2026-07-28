@@ -1,0 +1,260 @@
+.section {
+  width: min(1180px, calc(100% - 48px));
+  margin: 64px auto 0;
+}
+
+.heading p {
+  margin: 0 0 10px;
+  color: #688047;
+  font-size: 0.67rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.heading h1 {
+  margin: 0;
+  color: #17211d;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 570;
+  letter-spacing: -0.065em;
+  line-height: 1;
+}
+
+.heading > span {
+  display: block;
+  margin-top: 16px;
+  color: #5d6962;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.summary article {
+  padding: 22px;
+  border: 1px solid #dce2d7;
+  border-radius: 18px;
+  background: #fffefa;
+  box-shadow: 0 12px 30px rgba(38, 56, 45, 0.07);
+}
+
+.summary span,
+.summary strong {
+  display: block;
+}
+
+.summary span {
+  color: #69756e;
+  font-size: 0.64rem;
+  font-weight: 750;
+}
+
+.summary strong {
+  margin-top: 10px;
+  color: #24372d;
+  font-size: 1.7rem;
+  letter-spacing: -0.04em;
+}
+
+.search {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.search input {
+  width: min(420px, 100%);
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid #d3d9cf;
+  border-radius: 12px;
+  background: #fffefa;
+  color: #25352d;
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.search button,
+.search a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 17px;
+  border: 1px solid #22362b;
+  border-radius: 12px;
+  background: #22362b;
+  color: #fff;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.search a {
+  border-color: #d3d9cf;
+  background: #fffefa;
+  color: #4f5f56;
+}
+
+.resultMeta {
+  display: flex;
+  justify-content: flex-end;
+  margin: 16px 0 8px;
+  color: #6a766f;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid #dce2d7;
+  border-radius: 18px;
+  background: #fffefa;
+  box-shadow: 0 16px 38px rgba(38, 56, 45, 0.075);
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableWrap th {
+  padding: 14px 16px;
+  border-bottom: 1px solid #dce2d7;
+  background: #f1f4eb;
+  color: #5e6b63;
+  font-size: 0.59rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tableWrap td {
+  padding: 16px;
+  border-bottom: 1px solid #e8ebe4;
+  color: #45554c;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.tableWrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableWrap tbody tr:hover {
+  background: #fafbf6;
+}
+
+.tableWrap td:first-child strong,
+.tableWrap td:first-child span,
+.tableWrap td:nth-child(4) small {
+  display: block;
+}
+
+.tableWrap td:first-child strong {
+  color: #22342a;
+  font-size: 0.73rem;
+}
+
+.tableWrap td:first-child span,
+.tableWrap small {
+  margin-top: 4px;
+  color: #78827c;
+  font-size: 0.6rem;
+}
+
+.badge {
+  display: inline-flex;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.active {
+  background: #e6f0d6;
+  color: #405b2e;
+}
+
+.inactive {
+  background: #f4dfdc;
+  color: #864c45;
+}
+
+.neutral {
+  background: #eeefe9;
+  color: #657068;
+}
+
+.empty {
+  padding: 55px 24px;
+  border: 1px solid #dce2d7;
+  border-radius: 18px;
+  background: #fffefa;
+  text-align: center;
+}
+
+.empty strong {
+  color: #26372e;
+}
+
+.empty p {
+  margin: 8px 0 0;
+  color: #69756e;
+  font-size: 0.72rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 22px;
+  color: #66736a;
+  font-size: 0.67rem;
+  font-weight: 750;
+}
+
+.pagination a {
+  color: #31482c;
+}
+
+.pagination > span:first-child,
+.pagination > span:last-child {
+  opacity: 0.45;
+}
+
+@media (max-width: 800px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .section {
+    width: min(100% - 28px, 1180px);
+    margin-top: 42px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .search {
+    flex-wrap: wrap;
+  }
+
+  .search input {
+    width: 100%;
+  }
+}
