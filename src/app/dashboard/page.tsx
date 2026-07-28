@@ -103,22 +103,27 @@ export default async function DashboardPage() {
             </div>
           </div>
           {savedSessions.length ? (
-            <ul className={styles.sessionList}>
-              {savedSessions.slice(0, 3).map((session) => (
-                <li key={session.id}>
-                  <div>
-                    <strong>{session.role}</strong>
-                    <span>{session.interview_type}</span>
-                  </div>
-                  <time dateTime={session.created_at}>
-                    {new Intl.DateTimeFormat("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                    }).format(new Date(session.created_at))}
-                  </time>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className={styles.sessionList}>
+                {savedSessions.slice(0, 3).map((session) => (
+                  <li key={session.id}>
+                    <Link href={`/dashboard/history/${session.id}`}>
+                      <div>
+                        <strong>{session.role}</strong>
+                        <span>{session.interview_type}</span>
+                      </div>
+                      <time dateTime={session.created_at}>
+                        {new Intl.DateTimeFormat("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                        }).format(new Date(session.created_at))}
+                      </time>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/dashboard/history">View all sessions →</Link>
+            </>
           ) : (
             <>
               <p>
@@ -147,10 +152,13 @@ export default async function DashboardPage() {
               <span className={styles.pendingLabel}>No feedback saved yet</span>
             </>
           ) : (
-            <div className={styles.averageScore}>
-              <strong>{averageScore}</strong>
-              <span>Average answer score</span>
-            </div>
+            <>
+              <div className={styles.averageScore}>
+                <strong>{averageScore}</strong>
+                <span>Average answer score</span>
+              </div>
+              <Link href="/dashboard/progress">View full progress →</Link>
+            </>
           )}
         </article>
       </section>

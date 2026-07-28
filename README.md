@@ -64,6 +64,19 @@ sessions, and average feedback scores from Supabase. Practice still works
 without persistence when the database is not configured or the user is signed
 out.
 
+### Session history and progress
+
+The authenticated dashboard includes filterable, sortable, paginated session
+history at `/dashboard/history`. Each owner-protected detail page displays the
+saved configuration, transcripts, structured scores, strengths, improvements,
+and next action. Users can repeat a saved setup or delete the session and all
+related records after confirmation.
+
+`/dashboard/progress` calculates overall and category averages, strongest and
+weakest skills, recent score movement, role-level averages, and seven-day
+practice activity from the user’s saved data. Loading and empty states keep both
+areas useful before the first session is recorded.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -228,7 +241,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Supabase authentication and protected dashboard foundation
 - [x] Responsive authenticated dashboard and account summary
 - [x] Supabase persistence schema, RLS, and saved interview data
-- [ ] Session history and progress tracking
+- [x] Session history and progress tracking
 
 ## Branch strategy
 

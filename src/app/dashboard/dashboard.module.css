@@ -263,6 +263,10 @@
 }
 
 .sessionList li {
+  padding: 0;
+}
+
+.sessionList a {
   display: flex;
   align-items: center;
   justify-content: space-between;
