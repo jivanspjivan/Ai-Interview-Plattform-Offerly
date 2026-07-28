@@ -42,6 +42,15 @@ cookie refresh, logout, guest-only redirects, and the protected `/dashboard`
 route are implemented. The flows become active after Supabase project
 credentials and provider settings are configured.
 
+### Authenticated dashboard
+
+Authenticated users have a shared `/dashboard` workspace with responsive
+Overview and Account navigation, practice actions, account status, session and
+streak summaries, and clear empty states for upcoming history and progress
+features. `/dashboard/account` displays the verified Supabase identity,
+sign-in method, and account creation date while profile editing remains reserved
+for the database milestone.
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -195,6 +204,7 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Sticky navigation and expanded footer
 - [x] Illustrative company preparation showcase
 - [x] Supabase authentication and protected dashboard foundation
+- [x] Responsive authenticated dashboard and account summary
 - [ ] Session history and progress tracking
 
 ## Branch strategy

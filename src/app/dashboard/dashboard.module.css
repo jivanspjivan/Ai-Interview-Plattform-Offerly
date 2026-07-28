@@ -12,9 +12,9 @@
   top: 0;
   width: min(1180px, calc(100% - 48px));
   height: 68px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   margin-inline: auto;
   border-bottom: 1px solid rgba(93, 109, 100, 0.14);
   background: rgba(247, 245, 239, 0.94);
@@ -40,9 +40,23 @@
   color: #c8f269;
 }
 
-.nav > div {
+.navLinks {
   display: flex;
   align-items: center;
+  gap: 24px;
+  color: #5d6962;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.navLinks a:hover {
+  color: #17211d;
+}
+
+.accountActions {
+  display: flex;
+  align-items: center;
+  justify-self: end;
   gap: 17px;
   color: #5d6962;
   font-size: 0.7rem;
@@ -96,7 +110,14 @@
   line-height: 1.65;
 }
 
-.hero > a {
+.heroActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.heroActions a {
   min-height: 50px;
   display: inline-flex;
   align-items: center;
@@ -109,7 +130,13 @@
   font-weight: 800;
 }
 
-.grid {
+.heroActions a:last-child {
+  border: 1px solid #cfd5cb;
+  background: #fffefa;
+  color: #354139;
+}
+
+.summaryGrid {
   width: min(1000px, calc(100% - 48px));
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -117,7 +144,7 @@
   margin-inline: auto;
 }
 
-.grid article {
+.summaryGrid article {
   min-height: 180px;
   padding: 25px;
   border: 1px solid #d7dcd3;
@@ -126,7 +153,7 @@
   box-shadow: 0 15px 35px rgba(39, 56, 46, 0.08);
 }
 
-.grid article > span {
+.summaryGrid article > span {
   color: #6a776f;
   font-size: 0.62rem;
   font-weight: 800;
@@ -134,28 +161,205 @@
   text-transform: uppercase;
 }
 
-.grid strong {
+.summaryGrid strong {
   display: block;
   margin-top: 18px;
   color: #25362d;
   font-size: 1.2rem;
 }
 
-.grid p {
+.summaryGrid p {
   margin: 10px 0 0;
   color: #647068;
   font-size: 0.72rem;
   line-height: 1.6;
 }
 
+.statusCard {
+  background: #eef4e2 !important;
+}
+
+.dashboardPanels {
+  width: min(1000px, calc(100% - 48px));
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 18px auto 0;
+}
+
+.emptyPanel {
+  min-height: 260px;
+  padding: 28px;
+  border: 1px solid #d7dcd3;
+  border-radius: 20px;
+  background: #fffefa;
+  box-shadow: 0 17px 40px rgba(39, 56, 46, 0.075);
+}
+
+.emptyPanel > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.panelIcon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  flex: 0 0 43px;
+  place-items: center;
+  border-radius: 13px;
+  background: #e6eed9;
+  color: #536b40;
+  font-size: 1.1rem;
+}
+
+.emptyPanel > div p,
+.accountHeading > p {
+  margin: 0 0 5px;
+  color: #718052;
+  font-size: 0.6rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.emptyPanel h2 {
+  margin: 0;
+  color: #25362d;
+  font-size: 1.08rem;
+  letter-spacing: -0.025em;
+}
+
+.emptyPanel > p {
+  margin: 25px 0;
+  color: #657169;
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.emptyPanel > a {
+  color: #354b2d;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.pendingLabel {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f0f1eb;
+  color: #667169;
+  font-size: 0.6rem;
+  font-weight: 750;
+}
+
+.accountPage {
+  width: min(900px, calc(100% - 48px));
+  margin: 75px auto 0;
+}
+
+.accountHeading {
+  max-width: 650px;
+}
+
+.accountHeading h1 {
+  margin: 0;
+  color: #17211d;
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  font-weight: 570;
+  letter-spacing: -0.065em;
+}
+
+.accountHeading > span {
+  display: block;
+  margin-top: 16px;
+  color: #5e6a63;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.accountGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 38px;
+}
+
+.accountGrid article {
+  padding: 22px;
+  border: 1px solid #d8ddd4;
+  border-radius: 17px;
+  background: #fffefa;
+  box-shadow: 0 12px 28px rgba(39, 56, 46, 0.065);
+}
+
+.accountGrid span {
+  display: block;
+  color: #6a766f;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.accountGrid strong {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-top: 10px;
+  color: #27382e;
+  font-size: 0.88rem;
+}
+
+.settingsNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid #d4dcc9;
+  border-radius: 17px;
+  background: #eef4e2;
+}
+
+.settingsNotice strong {
+  color: #2c3d31;
+  font-size: 0.78rem;
+}
+
+.settingsNotice p {
+  margin: 6px 0 0;
+  color: #65705f;
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.settingsNotice a {
+  flex: none;
+  color: #34482e;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
 @media (max-width: 720px) {
   .nav,
   .hero,
-  .grid {
+  .summaryGrid,
+  .dashboardPanels,
+  .accountPage {
     width: calc(100% - 32px);
   }
 
-  .nav > div > span {
+  .nav {
+    grid-template-columns: 1fr auto;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .accountActions > span {
     display: none;
   }
 
@@ -163,7 +367,19 @@
     margin-top: 60px;
   }
 
-  .grid {
+  .summaryGrid,
+  .dashboardPanels,
+  .accountGrid {
     grid-template-columns: 1fr;
+  }
+
+  .heroActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .settingsNotice {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
