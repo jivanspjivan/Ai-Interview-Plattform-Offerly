@@ -19,9 +19,18 @@ const errorMessages: Record<string, string> = {
     "We could not verify that authentication link. Request a new link and try again.",
 };
 
+const successMessages: Record<string, string> = {
+  "check-email":
+    "Account created. Check your inbox and verify your email before logging in.",
+};
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const errorCode = typeof params.error === "string" ? params.error : "";
+  const registrationCode =
+    typeof params.registered === "string" ? params.registered : "";
+  const initialMessage =
+    successMessages[registrationCode] ?? errorMessages[errorCode] ?? "";
 
   return (
     <main className={styles.page}>
@@ -123,7 +132,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </section>
           <AuthForm
             mode="login"
-            initialMessage={errorMessages[errorCode] ?? ""}
+            initialMessage={initialMessage}
+            initialMessageKind={registrationCode ? "success" : "error"}
           />
       </div>
     </main>

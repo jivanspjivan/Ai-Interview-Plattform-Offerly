@@ -9,6 +9,7 @@ import styles from "./auth-form.module.css";
 type AuthFormProps = {
   mode: "login" | "register";
   initialMessage?: string;
+  initialMessageKind?: "error" | "success";
 };
 
 function friendlyError(error: unknown) {
@@ -40,11 +41,15 @@ function getSafeNextPath() {
   return next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 }
 
-export function AuthForm({ mode, initialMessage = "" }: AuthFormProps) {
+export function AuthForm({
+  mode,
+  initialMessage = "",
+  initialMessageKind = "error",
+}: AuthFormProps) {
   const router = useRouter();
   const [message, setMessage] = useState(initialMessage);
   const [messageKind, setMessageKind] = useState<"error" | "success">(
-    initialMessage ? "error" : "success",
+    initialMessage ? initialMessageKind : "success",
   );
   const [isLoading, setIsLoading] = useState(false);
   const isRegister = mode === "register";
@@ -77,10 +82,7 @@ export function AuthForm({ mode, initialMessage = "" }: AuthFormProps) {
         if (error) throw error;
 
         if (!data.session) {
-          setMessageKind("success");
-          setMessage(
-            "Check your email to verify your account, then return to log in.",
-          );
+          router.push("/login?registered=check-email");
           return;
         }
       } else {
