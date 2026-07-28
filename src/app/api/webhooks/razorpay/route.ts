@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json, SubscriptionRow } from "@/types/database";
 import { exceedsContentLength } from "@/lib/api-security";
 import { getPlanTierByRazorpayPlanId } from "@/lib/plans";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 type RazorpaySubscriptionEntity = {
   id?: string;
@@ -57,6 +58,7 @@ export function shouldApplyWebhookEvent(
 }
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   if (exceedsContentLength(request, 256 * 1024)) {
     return NextResponse.json({ error: "Webhook body is too large." }, { status: 413 });
   }
@@ -141,7 +143,17 @@ export async function POST(request: Request) {
           .update(update)
           .eq("id", existing.id);
         if (updateError) {
-          console.error("Unable to update Razorpay subscription", updateError);
+          logger.error(
+            "Verified Razorpay event could not update its subscription.",
+            logContext({
+              file: "src/app/api/webhooks/razorpay/route.ts",
+              function: "POST",
+              traceId,
+              key: "webhook.subscription_update_failed",
+              eventType: event.event ?? "unknown",
+              error: updateError,
+            }),
+          );
           return NextResponse.json(
             { error: "Unable to process webhook." },
             { status: 500 },
@@ -189,7 +201,17 @@ export async function POST(request: Request) {
           { onConflict: "user_id" },
         );
         if (upsertError) {
-          console.error("Unable to create Razorpay subscription", upsertError);
+          logger.error(
+            "Verified Razorpay event could not create its subscription.",
+            logContext({
+              file: "src/app/api/webhooks/razorpay/route.ts",
+              function: "POST",
+              traceId,
+              key: "webhook.subscription_create_failed",
+              eventType: event.event ?? "unknown",
+              error: upsertError,
+            }),
+          );
           return NextResponse.json(
             { error: "Unable to process webhook." },
             { status: 500 },
@@ -208,11 +230,31 @@ export async function POST(request: Request) {
     if (eventError.code === "23505") {
       return NextResponse.json({ received: true, duplicate: true });
     }
-    console.error("Unable to record Razorpay webhook event", eventError);
+    logger.error(
+      "Verified Razorpay event could not be recorded.",
+      logContext({
+        file: "src/app/api/webhooks/razorpay/route.ts",
+        function: "POST",
+        traceId,
+        key: "webhook.event_record_failed",
+        eventType: event.event ?? "unknown",
+        error: eventError,
+      }),
+    );
     return NextResponse.json(
       { error: "Unable to process webhook." },
       { status: 500 },
     );
   }
+  logger.info(
+    "Verified Razorpay webhook processed.",
+    logContext({
+      file: "src/app/api/webhooks/razorpay/route.ts",
+      function: "POST",
+      traceId,
+      key: "webhook.processed",
+      eventType: event.event ?? "unknown",
+    }),
+  );
   return NextResponse.json({ received: true });
 }

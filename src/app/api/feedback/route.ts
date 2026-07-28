@@ -8,6 +8,7 @@ import {
   parseJsonBody,
   sameOriginError,
 } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 const MAX_TRANSCRIPT_LENGTH = 12_000;
 
@@ -80,6 +81,7 @@ function isNonEmptyString(value: unknown, maxLength: number): value is string {
 }
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   const apiKey = process.env.OPENAI_API_KEY;
@@ -188,7 +190,16 @@ export async function POST(request: Request) {
     const result = (await response.json()) as OpenAIResponse;
 
     if (!response.ok) {
-      console.error("OpenAI feedback failed", response.status);
+      logger.error(
+        "OpenAI feedback request failed.",
+        logContext({
+          file: "src/app/api/feedback/route.ts",
+          function: "POST",
+          traceId,
+          key: "feedback.provider_failed",
+          providerStatus: response.status,
+        }),
+      );
       return NextResponse.json(
         {
           error:
@@ -216,7 +227,17 @@ export async function POST(request: Request) {
 
     const feedback = JSON.parse(message.content) as InterviewFeedback;
     return NextResponse.json({ feedback });
-  } catch {
+  } catch (error) {
+    logger.error(
+      "Feedback generation raised an exception.",
+      logContext({
+        file: "src/app/api/feedback/route.ts",
+        function: "POST",
+        traceId,
+        key: "feedback.exception",
+        error,
+      }),
+    );
     return NextResponse.json(
       { error: "The feedback service is currently unavailable." },
       { status: 502 },

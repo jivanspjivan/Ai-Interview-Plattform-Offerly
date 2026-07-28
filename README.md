@@ -148,6 +148,43 @@ HMAC-verified, and global response headers add CSP, clickjacking protection,
 MIME sniffing protection, HTTPS enforcement, referrer controls, and a restricted
 browser permissions policy.
 
+### Legal, support, and structured monitoring
+
+Public `/privacy`, `/terms`, `/refund-policy`, and `/support` pages explain
+personal-data processing, acceptable use, subscriptions, cancellation, refund
+review, account deletion, and secure support requests. Registration links point
+to real legal routes, and the homepage footer exposes the trust section.
+
+Server diagnostics use Winston rather than direct console calls. Each critical
+entry is single-line JSON with a timestamp, severity, `file`, `function`,
+request `traceId`, meaningful event `key`, bounded message, and safe metadata.
+Messages are capped at 500 characters, metadata strings at 250, error stacks at
+1,200, and complete serialized entries at 4,000. Keys associated with passwords,
+authorization, cookies, secrets, tokens, signatures, transcripts, audio, and
+email are redacted automatically.
+
+Trace IDs are propagated through protected and API requests and returned through
+the `x-trace-id` response header. Search that value in hosting logs to connect a
+reported failure to its server entry. Winston writes to standard output by
+default. Local rotating logs can be enabled with `LOG_TO_FILE=true`; they use
+`logs/offerly.log`, rotate at 5 MB, and retain three files.
+
+```ts
+import { getTraceId, logContext, logger } from "@/lib/logger";
+
+const traceId = getTraceId(request);
+logger.error(
+  "Subscription update failed.",
+  logContext({
+    file: "src/app/api/billing/change/route.ts",
+    function: "POST",
+    traceId,
+    key: "billing.plan_change_failed",
+    error,
+  }),
+);
+```
+
 ### AI interview feedback
 
 Candidates can request structured coaching after transcribing an answer. A
@@ -223,6 +260,7 @@ makes future branding changes easy to locate.
 - Next.js 16 with the App Router
 - React 19
 - TypeScript with strict type checking
+- Winston structured server logging
 - CSS with responsive layouts and reduced-motion support
 - ESLint with the Next.js Core Web Vitals rules
 
@@ -250,6 +288,9 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ADMIN_EMAILS=admin@example.com
+NEXT_PUBLIC_SUPPORT_EMAIL=support@example.com
+LOG_LEVEL=info
+LOG_TO_FILE=false
 NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_your_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 RAZORPAY_WEBHOOK_SECRET=your_separate_webhook_secret
@@ -350,6 +391,8 @@ For the code flow, architectural reasoning, and interview preparation notes, see
 - [x] Playwright public-journey, security, and responsive browser tests
 - [x] Profile editing, password changes, and subscription-safe account deletion
 - [x] Razorpay subscription upgrades and scheduled downgrades
+- [x] Privacy, terms, refund, and support pages
+- [x] Winston structured logging with trace IDs and redaction
 
 ## Branch strategy
 

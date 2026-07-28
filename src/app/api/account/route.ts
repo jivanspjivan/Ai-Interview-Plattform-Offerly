@@ -7,10 +7,12 @@ import {
 } from "@/lib/api-security";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getRazorpayConfig } from "@/lib/razorpay";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 const terminalStatuses = new Set(["inactive", "cancelled", "completed", "expired"]);
 
 export async function DELETE(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   const user = await requireUser();
@@ -70,6 +72,17 @@ export async function DELETE(request: Request) {
         },
       );
       if (!cancellation.ok) {
+        logger.error(
+          "Account deletion stopped because subscription cancellation failed.",
+          logContext({
+            file: "src/app/api/account/route.ts",
+            function: "DELETE",
+            traceId,
+            key: "account.delete_billing_failed",
+            providerStatus: cancellation.status,
+            subscriptionStatus: subscription.status,
+          }),
+        );
         return NextResponse.json(
           {
             error:
@@ -78,7 +91,17 @@ export async function DELETE(request: Request) {
           { status: 502 },
         );
       }
-    } catch {
+    } catch (error) {
+      logger.error(
+        "Account deletion could not verify or stop recurring billing.",
+        logContext({
+          file: "src/app/api/account/route.ts",
+          function: "DELETE",
+          traceId,
+          key: "account.delete_billing_exception",
+          error,
+        }),
+      );
       return NextResponse.json(
         {
           error:
@@ -91,10 +114,29 @@ export async function DELETE(request: Request) {
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
   if (deleteError) {
+    logger.error(
+      "Supabase failed to delete the authenticated account.",
+      logContext({
+        file: "src/app/api/account/route.ts",
+        function: "DELETE",
+        traceId,
+        key: "account.delete_failed",
+        error: deleteError,
+      }),
+    );
     return NextResponse.json(
       { error: "Your account could not be deleted." },
       { status: 500 },
     );
   }
+  logger.info(
+    "User account and cascading records were deleted.",
+    logContext({
+      file: "src/app/api/account/route.ts",
+      function: "DELETE",
+      traceId,
+      key: "account.deleted",
+    }),
+  );
   return NextResponse.json({ deleted: true });
 }

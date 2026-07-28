@@ -7,6 +7,7 @@ import {
   parseJsonBody,
   sameOriginError,
 } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>;
@@ -31,6 +32,7 @@ function isFeedback(value: unknown): value is InterviewFeedback {
 }
 
 export async function PUT(request: Request, { params }: RouteContext) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   if (!hasSupabaseConfig()) {
@@ -101,6 +103,18 @@ export async function PUT(request: Request, { params }: RouteContext) {
     .single();
 
   if (answerError) {
+    logger.error(
+      "Interview answer persistence failed.",
+      logContext({
+        file: "src/app/api/sessions/[sessionId]/answers/route.ts",
+        function: "PUT",
+        traceId,
+        key: "answers.save_failed",
+        questionType,
+        hasTranscript: Boolean(transcript),
+        error: answerError,
+      }),
+    );
     return NextResponse.json({ error: "The answer could not be saved." }, { status: 500 });
   }
 
@@ -125,6 +139,16 @@ export async function PUT(request: Request, { params }: RouteContext) {
       );
 
     if (feedbackError) {
+      logger.error(
+        "Interview feedback persistence failed.",
+        logContext({
+          file: "src/app/api/sessions/[sessionId]/answers/route.ts",
+          function: "PUT",
+          traceId,
+          key: "feedback.save_failed",
+          error: feedbackError,
+        }),
+      );
       return NextResponse.json({ error: "Feedback could not be saved." }, { status: 500 });
     }
   }

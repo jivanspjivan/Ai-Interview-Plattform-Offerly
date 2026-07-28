@@ -6,12 +6,14 @@ import {
   parseJsonBody,
   sameOriginError,
 } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>;
 };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   if (!hasSupabaseConfig()) {
@@ -61,6 +63,18 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     .maybeSingle();
 
   if (error) {
+    logger.error(
+      "Interview session status update failed.",
+      logContext({
+        file: "src/app/api/sessions/[sessionId]/route.ts",
+        function: "PATCH",
+        traceId,
+        key: "sessions.status_update_failed",
+        status,
+        elapsedSeconds,
+        error,
+      }),
+    );
     return NextResponse.json({ error: "The session could not be updated." }, { status: 500 });
   }
   if (!data) {

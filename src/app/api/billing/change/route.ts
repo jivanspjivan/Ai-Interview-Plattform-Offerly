@@ -13,8 +13,10 @@ import {
   parseJsonBody,
   sameOriginError,
 } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   const user = await requireUser();
@@ -99,6 +101,18 @@ export async function POST(request: Request) {
     error?: { description?: string };
   };
   if (!response.ok) {
+    logger.error(
+      "Razorpay rejected a subscription plan change.",
+      logContext({
+        file: "src/app/api/billing/change/route.ts",
+        function: "POST",
+        traceId,
+        key: "billing.plan_change_provider_failed",
+        providerStatus: response.status,
+        nextPlan,
+        timing,
+      }),
+    );
     return NextResponse.json(
       {
         error:
@@ -123,7 +137,18 @@ export async function POST(request: Request) {
     })
     .eq("id", subscription.id);
   if (updateError) {
-    console.error("Unable to record scheduled plan change", updateError);
+    logger.error(
+      "Razorpay accepted a plan change but local persistence failed.",
+      logContext({
+        file: "src/app/api/billing/change/route.ts",
+        function: "POST",
+        traceId,
+        key: "billing.plan_change_persistence_failed",
+        nextPlan,
+        timing,
+        error: updateError,
+      }),
+    );
     return NextResponse.json(
       {
         error:
@@ -133,6 +158,17 @@ export async function POST(request: Request) {
     );
   }
 
+  logger.info(
+    "Subscription plan change accepted.",
+    logContext({
+      file: "src/app/api/billing/change/route.ts",
+      function: "POST",
+      traceId,
+      key: "billing.plan_change_accepted",
+      nextPlan,
+      timing,
+    }),
+  );
   return NextResponse.json({
     changed: true,
     timing,

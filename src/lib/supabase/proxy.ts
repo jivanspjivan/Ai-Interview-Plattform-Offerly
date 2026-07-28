@@ -6,8 +6,11 @@ import { hasSupabaseConfig, getSupabaseConfig } from "./config";
 const protectedRoutes = ["/dashboard", "/update-password"];
 const guestOnlyRoutes = ["/login", "/register"];
 
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(request: NextRequest, traceId: string) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-trace-id", traceId);
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("x-trace-id", traceId);
 
   if (!hasSupabaseConfig()) {
     return response;
@@ -26,7 +29,8 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({ request });
+          response = NextResponse.next({ request: { headers: requestHeaders } });
+          response.headers.set("x-trace-id", traceId);
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
@@ -48,11 +52,17 @@ export async function updateSession(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    redirectResponse.headers.set("x-trace-id", traceId);
+    return redirectResponse;
   }
 
   if (user && isGuestOnly) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const redirectResponse = NextResponse.redirect(
+      new URL("/dashboard", request.url),
+    );
+    redirectResponse.headers.set("x-trace-id", traceId);
+    return redirectResponse;
   }
 
   return response;

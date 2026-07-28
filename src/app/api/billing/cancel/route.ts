@@ -3,8 +3,10 @@ import { requireUser } from "@/lib/auth";
 import { getRazorpayConfig } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { enforceRateLimit, sameOriginError } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   const user = await requireUser();
@@ -39,6 +41,16 @@ export async function POST(request: Request) {
     },
   );
   if (!response.ok) {
+    logger.error(
+      "Razorpay rejected subscription cancellation.",
+      logContext({
+        file: "src/app/api/billing/cancel/route.ts",
+        function: "POST",
+        traceId,
+        key: "billing.cancel_provider_failed",
+        providerStatus: response.status,
+      }),
+    );
     return NextResponse.json({ error: "Cancellation could not be scheduled." }, { status: 502 });
   }
 
@@ -46,5 +58,14 @@ export async function POST(request: Request) {
     .from("subscriptions")
     .update({ cancel_at_period_end: true })
     .eq("id", subscription.id);
+  logger.info(
+    "Subscription cancellation scheduled.",
+    logContext({
+      file: "src/app/api/billing/cancel/route.ts",
+      function: "POST",
+      traceId,
+      key: "billing.cancel_scheduled",
+    }),
+  );
   return NextResponse.json({ cancelled: true });
 }

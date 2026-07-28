@@ -12,8 +12,10 @@ import {
   parseJsonBody,
   sameOriginError,
 } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 export async function GET(request: Request) {
+  const traceId = getTraceId(request);
   if (!hasSupabaseConfig()) {
     return NextResponse.json({ error: "Persistence is not configured." }, { status: 503 });
   }
@@ -40,6 +42,16 @@ export async function GET(request: Request) {
     .limit(20);
 
   if (error) {
+    logger.error(
+      "Session history query failed.",
+      logContext({
+        file: "src/app/api/sessions/route.ts",
+        function: "GET",
+        traceId,
+        key: "sessions.read_failed",
+        error,
+      }),
+    );
     return NextResponse.json({ error: "Sessions could not be loaded." }, { status: 500 });
   }
 
@@ -47,6 +59,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   if (!hasSupabaseConfig()) {
@@ -124,6 +137,20 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
+    logger.error(
+      "Interview session creation failed.",
+      logContext({
+        file: "src/app/api/sessions/route.ts",
+        function: "POST",
+        traceId,
+        key: "sessions.create_failed",
+        interviewType,
+        experience,
+        duration,
+        questionCount,
+        error,
+      }),
+    );
     return NextResponse.json({ error: "The session could not be saved." }, { status: 500 });
   }
 

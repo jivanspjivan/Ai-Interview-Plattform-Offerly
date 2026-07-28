@@ -22,6 +22,18 @@ test("responses include browser security headers", async ({ request }) => {
   expect(response.headers()["permissions-policy"]).toContain(
     "microphone=(self)",
   );
+  const apiResponse = await request.get("/api/sessions");
+  expect(apiResponse.headers()["x-trace-id"]).toMatch(
+    /^[a-zA-Z0-9_-]{8,80}$/,
+  );
+});
+
+test("legal and support pages are publicly available", async ({ page }) => {
+  for (const path of ["/privacy", "/terms", "/refund-policy", "/support"]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  }
 });
 
 test("invalid interview session links return to setup", async ({ page }) => {

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 type RateLimitOptions = {
   action: string;
@@ -85,6 +86,7 @@ export async function enforceRateLimit(
   request: Request,
   options: RateLimitOptions,
 ) {
+  const traceId = getTraceId(request);
   try {
     const admin = createAdminClient();
     const { data, error } = await admin.rpc("consume_rate_limit", {
@@ -94,7 +96,17 @@ export async function enforceRateLimit(
       p_window_seconds: options.windowSeconds,
     });
     if (error || !data?.[0]) {
-      console.error("Rate limit storage failed", error);
+      logger.error(
+        "Rate-limit storage did not return a usable result.",
+        logContext({
+          file: "src/lib/api-security.ts",
+          function: "enforceRateLimit",
+          traceId,
+          key: "rate_limit.storage_failed",
+          action: options.action,
+          error,
+        }),
+      );
       return NextResponse.json(
         { error: "Request protection is temporarily unavailable." },
         { status: 503 },
@@ -103,6 +115,18 @@ export async function enforceRateLimit(
 
     const result = data[0];
     if (result.allowed) return null;
+    logger.warn(
+      "Request rejected because its rate limit was exceeded.",
+      logContext({
+        file: "src/lib/api-security.ts",
+        function: "enforceRateLimit",
+        traceId,
+        key: "rate_limit.exceeded",
+        action: options.action,
+        limit: options.limit,
+        windowSeconds: options.windowSeconds,
+      }),
+    );
     const retryAfter = Math.max(
       1,
       Math.ceil((new Date(result.reset_at).getTime() - Date.now()) / 1000),
@@ -120,7 +144,17 @@ export async function enforceRateLimit(
       },
     );
   } catch (error) {
-    console.error("Rate limit enforcement failed", error);
+    logger.error(
+      "Rate-limit enforcement raised an exception.",
+      logContext({
+        file: "src/lib/api-security.ts",
+        function: "enforceRateLimit",
+        traceId,
+        key: "rate_limit.exception",
+        action: options.action,
+        error,
+      }),
+    );
     return NextResponse.json(
       { error: "Request protection is temporarily unavailable." },
       { status: 503 },

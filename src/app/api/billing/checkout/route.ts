@@ -12,8 +12,10 @@ import {
   parseJsonBody,
   sameOriginError,
 } from "@/lib/api-security";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   const user = await requireUser();
@@ -102,6 +104,17 @@ export async function POST(request: Request) {
           : "",
     });
   } catch (error) {
+    logger.error(
+      "Subscription checkout could not be created.",
+      logContext({
+        file: "src/app/api/billing/checkout/route.ts",
+        function: "POST",
+        traceId,
+        key: "billing.checkout_failed",
+        plan: body.plan,
+        error,
+      }),
+    );
     return NextResponse.json(
       {
         error:

@@ -365,6 +365,10 @@ export default function Home() {
                 <FooterIcon kind="register" />
                 Create account
               </a>
+              <a href="/support">Support</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
+              <a href="/refund-policy">Refunds</a>
             </div>
             <div>
               <strong>Follow</strong>

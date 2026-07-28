@@ -6,6 +6,7 @@ import {
 } from "@/lib/api-security";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { getTraceId, logContext, logger } from "@/lib/logger";
 
 const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
 const SUPPORTED_AUDIO_TYPES = new Set([
@@ -24,6 +25,7 @@ type OpenAITranscriptionResponse = {
 };
 
 export async function POST(request: Request) {
+  const traceId = getTraceId(request);
   const originError = sameOriginError(request);
   if (originError) return originError;
   if (exceedsContentLength(request, MAX_AUDIO_SIZE + 1024 * 1024)) {
@@ -115,7 +117,18 @@ export async function POST(request: Request) {
     const result = (await response.json()) as OpenAITranscriptionResponse;
 
     if (!response.ok) {
-      console.error("OpenAI transcription failed", response.status);
+      logger.error(
+        "OpenAI transcription request failed.",
+        logContext({
+          file: "src/app/api/transcribe/route.ts",
+          function: "POST",
+          traceId,
+          key: "transcription.provider_failed",
+          providerStatus: response.status,
+          audioBytes: audio.size,
+          audioType: normalizedType || "unknown",
+        }),
+      );
       return NextResponse.json(
         {
           error:
@@ -135,7 +148,17 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ transcript });
-  } catch {
+  } catch (error) {
+    logger.error(
+      "Transcription raised an exception.",
+      logContext({
+        file: "src/app/api/transcribe/route.ts",
+        function: "POST",
+        traceId,
+        key: "transcription.exception",
+        error,
+      }),
+    );
     return NextResponse.json(
       { error: "The transcription service is currently unavailable." },
       { status: 502 },
