@@ -89,6 +89,10 @@ reports per calendar month. Active Premium and Premium Plus subscriptions remove
 those limits. Paid access is granted only after an `active` subscription webhook
 has been verified.
 
+Billing reliability also includes user-triggered Razorpay reconciliation,
+scheduled plan-change cancellation, pending/halted payment guidance, and a
+sanitized activity timeline. Webhook event IDs keep processing idempotent.
+
 ### Automated reliability tests
 
 Vitest protects the billing and entitlement rules that control paid access.
@@ -116,6 +120,24 @@ searchable, paginated user table shows account availability, current plan,
 subscription lifecycle status, interview count, join date, and last sign-in.
 The page uses the Supabase service role only on the server and redirects
 non-admin users back to their dashboard.
+
+Administrators can open user detail pages, suspend or restore access, export a
+CSV user/subscription inventory, and review a durable audit trail.
+`/dashboard/admin/monitoring` summarizes billing attention, email delivery,
+rate-limit traffic, and traceable operational events.
+
+### Recovery, generated questions, reports, and email
+
+Active interviews save a browser recovery checkpoint and periodically sync the
+question position and elapsed time. Candidates can pause the timer, continue
+offline, and resume after a reload. Role- and seniority-specific questions are
+generated through the protected OpenAI endpoint, with the local question bank
+as a no-cost and offline fallback.
+
+Saved session reports include a consolidated score, readiness benchmark, and
+print/PDF export. Completion notifications use a retryable email outbox. Invoke
+`POST /api/cron/email-outbox` with `Authorization: Bearer $CRON_SECRET` from the
+deployment scheduler; delivery uses Resend when its environment values are set.
 
 ### Account and subscription management
 
@@ -261,6 +283,7 @@ makes future branding changes easy to locate.
 - React 19
 - TypeScript with strict type checking
 - Winston structured server logging
+- Resend-compatible transactional email outbox
 - CSS with responsive layouts and reduced-motion support
 - ESLint with the Next.js Core Web Vitals rules
 
@@ -277,6 +300,10 @@ Install dependencies and start the development server:
 npm install
 npm run dev
 ```
+
+Apply all SQL files in `supabase/migrations` in filename order before enabling
+the operational features. Copy `.env.example` and configure Supabase, OpenAI,
+Razorpay, Resend, the public site URL, and a long random cron secret.
 
 Open [http://localhost:3000](http://localhost:3000).
 

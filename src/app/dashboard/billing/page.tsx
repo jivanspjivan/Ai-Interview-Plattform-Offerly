@@ -4,6 +4,7 @@ import { planCatalog, type PlanTier } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
 import {
   CancelSubscriptionButton,
+  BillingMaintenanceButton,
   ChangePlanButton,
   CheckoutButton,
 } from "@/components/billing-actions";
@@ -20,7 +21,7 @@ export default async function BillingPage() {
   const monthStart = new Date();
   monthStart.setUTCDate(1);
   monthStart.setUTCHours(0, 0, 0, 0);
-  const [{ data: subscription }, { count: sessionCount }, { count: feedbackCount }] =
+  const [{ data: subscription }, { count: sessionCount }, { count: feedbackCount }, { data: activity }] =
     await Promise.all([
       supabase
         .from("subscriptions")
@@ -37,6 +38,12 @@ export default async function BillingPage() {
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .gte("created_at", monthStart.toISOString()),
+      supabase
+        .from("billing_activity")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(8),
     ]);
   const isPaidActive = subscription?.status === "active";
   const tier: PlanTier = isPaidActive ? subscription.plan_tier : "basic";
@@ -83,6 +90,9 @@ export default async function BillingPage() {
                   }).format(new Date(subscription.scheduled_change_at))}`
                 : "Waiting for Razorpay confirmation"}
             </p>
+            <BillingMaintenanceButton action="cancel-change" className={styles.cancelButton}>
+              Cancel plan change
+            </BillingMaintenanceButton>
           </div>
         )}
         {subscription?.cancel_at_period_end && (
@@ -94,7 +104,19 @@ export default async function BillingPage() {
         {isPaidActive && !subscription.cancel_at_period_end && (
           <CancelSubscriptionButton className={styles.cancelButton} />
         )}
+        {subscription?.razorpay_subscription_id && (
+          <BillingMaintenanceButton action="reconcile" className={styles.cancelButton}>
+            Refresh billing status
+          </BillingMaintenanceButton>
+        )}
       </div>
+
+      {(subscription?.status === "pending" || subscription?.status === "halted") && (
+        <p role="alert" className={styles.billingNote}>
+          Your payment needs attention. Refresh the billing status after resolving it
+          in Razorpay Checkout, or contact support with your subscription ID.
+        </p>
+      )}
 
       <div className={styles.usageGrid}>
         <article>
@@ -116,6 +138,23 @@ export default async function BillingPage() {
           </strong>
         </article>
       </div>
+
+      {!!activity?.length && (
+        <div className={styles.currentPlan}>
+          <div>
+            <span>Recent billing activity</span>
+            {activity.map((item) => (
+              <p key={item.id}>
+                {item.event_type.replaceAll(".", " ")} ·{" "}
+                {new Intl.DateTimeFormat("en-IN", {
+                  dateStyle: "medium", timeStyle: "short",
+                }).format(new Date(item.created_at))}
+                {item.amount ? ` · ₹${(item.amount / 100).toFixed(2)}` : ""}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className={styles.planGrid}>
         {(["premium", "premium_plus"] as const).map((plan) => {

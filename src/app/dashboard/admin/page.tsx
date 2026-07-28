@@ -157,6 +157,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         />
         <button type="submit">Search</button>
         {search && <Link href="/dashboard/admin">Clear</Link>}
+        <Link href="/dashboard/admin/monitoring">Monitoring</Link>
+        <Link href="/api/admin/export">Export CSV</Link>
       </form>
 
       <div className={styles.resultMeta}>
@@ -192,7 +194,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 return (
                   <tr key={profile.id}>
                     <td>
-                      <strong>{profile.full_name || "Unnamed user"}</strong>
+                      <strong><Link href={`/dashboard/admin/users/${profile.id}`}>
+                        {profile.full_name || "Unnamed user"}
+                      </Link></strong>
                       <span>{profile.email}</span>
                     </td>
                     <td>

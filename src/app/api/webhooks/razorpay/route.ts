@@ -24,6 +24,9 @@ type RazorpayWebhook = {
   created_at?: number;
   payload?: {
     subscription?: { entity?: RazorpaySubscriptionEntity };
+    payment?: {
+      entity?: { id?: string; amount?: number; currency?: string };
+    };
   };
 };
 
@@ -96,6 +99,7 @@ export async function POST(request: Request) {
   }
 
   const entity = event.payload?.subscription?.entity;
+  let activityUserId: string | undefined = entity?.notes?.offerly_user_id;
   if (entity?.id) {
     const status = normalizeSubscriptionStatus(entity.status);
     const effectivePlanTier = getPlanTierByRazorpayPlanId(entity.plan_id);
@@ -133,6 +137,9 @@ export async function POST(request: Request) {
       .eq("razorpay_subscription_id", entity.id)
       .maybeSingle();
     if (existing) {
+      const { data: owner } = await admin
+        .from("subscriptions").select("user_id").eq("id", existing.id).single();
+      activityUserId = owner?.user_id;
       const isNewer = shouldApplyWebhookEvent(
         existing.last_event_at,
         event.created_at,
@@ -219,6 +226,18 @@ export async function POST(request: Request) {
         }
       }
     }
+  }
+
+  const payment = event.payload?.payment?.entity;
+  if (activityUserId) {
+    await admin.from("billing_activity").upsert({
+      event_id: eventId,
+      user_id: activityUserId,
+      event_type: event.event ?? "unknown",
+      payment_id: payment?.id ?? null,
+      amount: payment?.amount ?? null,
+      currency: payment?.currency ?? null,
+    }, { onConflict: "event_id" });
   }
 
   const { error: eventError } = await admin.from("billing_events").insert({

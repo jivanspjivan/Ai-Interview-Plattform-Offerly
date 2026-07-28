@@ -12,6 +12,7 @@ export type ProfileRow = {
   full_name: string | null;
   created_at: string;
   updated_at: string;
+  is_suspended: boolean;
 };
 
 export type InterviewSessionRow = {
@@ -28,6 +29,8 @@ export type InterviewSessionRow = {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  current_question: number;
+  paused_at: string | null;
 };
 
 export type InterviewAnswerRow = {
@@ -99,6 +102,52 @@ export type ApiRateLimitRow = {
   request_count: number;
 };
 
+export type BillingActivityRow = {
+  id: string;
+  event_id: string;
+  user_id: string;
+  event_type: string;
+  payment_id: string | null;
+  amount: number | null;
+  currency: string | null;
+  created_at: string;
+};
+
+export type AdminAuditLogRow = {
+  id: string;
+  admin_user_id: string;
+  target_user_id: string | null;
+  action: string;
+  detail: Json;
+  created_at: string;
+};
+
+export type OperationalEventRow = {
+  id: string;
+  severity: "info" | "warn" | "error";
+  event_key: string;
+  trace_id: string;
+  source_file: string;
+  source_function: string;
+  message: string;
+  metadata: Json;
+  created_at: string;
+};
+
+export type EmailOutboxRow = {
+  id: string;
+  user_id: string | null;
+  recipient: string;
+  template: string;
+  subject: string;
+  payload: Json;
+  status: "pending" | "sent" | "failed";
+  attempts: number;
+  last_error: string | null;
+  sent_at: string | null;
+  created_at: string;
+};
+
 type Insert<T, Generated extends keyof T> = Omit<T, Generated> &
   Partial<Pick<T, Generated>>;
 
@@ -109,7 +158,7 @@ export type Database = {
     Tables: {
       profiles: {
         Row: ProfileRow;
-        Insert: Insert<ProfileRow, "created_at" | "updated_at">;
+        Insert: Insert<ProfileRow, "created_at" | "updated_at" | "is_suspended">;
         Update: Update<ProfileRow>;
         Relationships: [];
       };
@@ -124,6 +173,8 @@ export type Database = {
           | "completed_at"
           | "created_at"
           | "updated_at"
+          | "current_question"
+          | "paused_at"
         >;
         Update: Update<InterviewSessionRow>;
         Relationships: [];
@@ -177,6 +228,33 @@ export type Database = {
         Row: ApiRateLimitRow;
         Insert: Insert<ApiRateLimitRow, "window_started_at" | "request_count">;
         Update: Update<ApiRateLimitRow>;
+        Relationships: [];
+      };
+      billing_activity: {
+        Row: BillingActivityRow;
+        Insert: Insert<BillingActivityRow, "id" | "created_at">;
+        Update: Update<BillingActivityRow>;
+        Relationships: [];
+      };
+      admin_audit_logs: {
+        Row: AdminAuditLogRow;
+        Insert: Insert<AdminAuditLogRow, "id" | "detail" | "created_at">;
+        Update: Update<AdminAuditLogRow>;
+        Relationships: [];
+      };
+      operational_events: {
+        Row: OperationalEventRow;
+        Insert: Insert<OperationalEventRow, "id" | "metadata" | "created_at">;
+        Update: Update<OperationalEventRow>;
+        Relationships: [];
+      };
+      email_outbox: {
+        Row: EmailOutboxRow;
+        Insert: Insert<
+          EmailOutboxRow,
+          "id" | "status" | "attempts" | "last_error" | "sent_at" | "created_at"
+        >;
+        Update: Update<EmailOutboxRow>;
         Relationships: [];
       };
     };

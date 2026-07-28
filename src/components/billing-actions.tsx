@@ -217,3 +217,34 @@ export function ChangePlanButton({
     </div>
   );
 }
+
+export function BillingMaintenanceButton({
+  action,
+  children,
+  className,
+}: {
+  action: "reconcile" | "cancel-change";
+  children: React.ReactNode;
+  className: string;
+}) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  async function run() {
+    setLoading(true);
+    setMessage("");
+    const response = await fetch(`/api/billing/${action}`, { method: "POST" });
+    const result = (await response.json()) as { error?: string };
+    setLoading(false);
+    setMessage(response.ok ? "Billing status updated." : (result.error ?? "Update failed."));
+    if (response.ok) router.refresh();
+  }
+  return (
+    <div>
+      <button className={className} disabled={loading} onClick={run} type="button">
+        {loading ? "Updating…" : children}
+      </button>
+      {message && <p role="status">{message}</p>}
+    </div>
+  );
+}

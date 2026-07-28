@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnswerRecorder } from "@/components/answer-recorder";
-import { getQuestions } from "@/data/interview-questions";
+import { getQuestions, type InterviewQuestion } from "@/data/interview-questions";
 import type { InterviewFeedback } from "@/types/interview-feedback";
 import type { InterviewSetup } from "@/types/interview";
 import styles from "./interview-session.module.css";
@@ -26,10 +26,11 @@ function formatTime(totalSeconds: number) {
 }
 
 export function InterviewSession({ setup }: InterviewSessionProps) {
-  const questions = useMemo(
+  const fallbackQuestions = useMemo(
     () => getQuestions(setup.interviewType),
     [setup.interviewType],
   );
+  const [questions, setQuestions] = useState<InterviewQuestion[]>(fallbackQuestions);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
@@ -37,8 +38,27 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
     Record<string, AnswerRecording>
   >({});
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const sessionCreationStarted = useRef(false);
+  const recoveryKey = useMemo(
+    () => `offerly:interview:${setup.role}:${setup.interviewType}:${setup.experience}:${setup.duration}`,
+    [setup],
+  );
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/questions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(setup),
+    }).then(async (response) => {
+      const result = (await response.json()) as { questions?: InterviewQuestion[] };
+      if (active && response.ok && result.questions?.length) setQuestions(result.questions);
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [setup]);
 
   const createPersistedSession = useCallback(async () => {
     try {
@@ -62,18 +82,59 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
   useEffect(() => {
     if (sessionCreationStarted.current) return;
     sessionCreationStarted.current = true;
-    void createPersistedSession();
-  }, [createPersistedSession]);
+    try {
+      const saved = JSON.parse(localStorage.getItem(recoveryKey) ?? "null") as
+        | { sessionId?: string; questionIndex?: number; elapsedSeconds?: number }
+        | null;
+      if (!saved?.sessionId) {
+        window.setTimeout(() => void createPersistedSession(), 0);
+        return;
+      }
+      window.setTimeout(() => {
+        setSessionId(saved.sessionId ?? null);
+        if (Number.isInteger(saved.questionIndex)) {
+          setQuestionIndex(Math.min(saved.questionIndex!, questions.length - 1));
+        }
+        if (Number.isInteger(saved.elapsedSeconds)) setElapsedSeconds(saved.elapsedSeconds!);
+      }, 0);
+    } catch {
+      window.setTimeout(() => void createPersistedSession(), 0);
+    }
+  }, [createPersistedSession, questions.length, recoveryKey]);
+
+  useEffect(() => {
+    const update = () => setIsOnline(navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
 
   useEffect(() => {
     if (isComplete) return;
+    localStorage.setItem(recoveryKey, JSON.stringify({
+      sessionId, questionIndex, elapsedSeconds, savedAt: new Date().toISOString(),
+    }));
+    if (!sessionId || !isOnline || elapsedSeconds % 15 !== 0) return;
+    void fetch(`/api/sessions/${sessionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "in_progress", elapsedSeconds, currentQuestion: questionIndex }),
+    });
+  }, [elapsedSeconds, isComplete, isOnline, questionIndex, recoveryKey, sessionId]);
+
+  useEffect(() => {
+    if (isComplete || isPaused) return;
 
     const timer = window.setInterval(() => {
       setElapsedSeconds((current) => current + 1);
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [isComplete]);
+  }, [isComplete, isPaused]);
 
   const question = questions[questionIndex];
   const handleRecordingChange = useCallback((recording: boolean) => {
@@ -117,14 +178,14 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
         await fetch(`/api/sessions/${sessionId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status, elapsedSeconds }),
+          body: JSON.stringify({ status, elapsedSeconds, currentQuestion: questionIndex }),
           keepalive: status === "abandoned",
         });
       } catch {
         // Completion UI should not be blocked by a persistence failure.
       }
     },
-    [elapsedSeconds, sessionId],
+    [elapsedSeconds, questionIndex, sessionId],
   );
 
   useEffect(() => {
@@ -143,6 +204,10 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
       );
     });
   }, [persistAnswer, questions, recordings, sessionId]);
+
+  useEffect(() => {
+    if (isComplete) localStorage.removeItem(recoveryKey);
+  }, [isComplete, recoveryKey]);
 
   if (isComplete) {
     return (
@@ -272,6 +337,11 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
       </nav>
 
       <section className={styles.session}>
+        {!isOnline && (
+          <p role="status" className={styles.recordingNotice}>
+            You are offline. Your progress is saved on this device and will sync after reconnection.
+          </p>
+        )}
         <header className={styles.sessionHeader}>
           <div className={styles.progressDetails}>
             <p>
@@ -291,6 +361,9 @@ export function InterviewSession({ setup }: InterviewSessionProps) {
             <span>Elapsed</span>
             {formatTime(elapsedSeconds)}
           </time>
+          <button type="button" onClick={() => setIsPaused((value) => !value)}>
+            {isPaused ? "Resume" : "Pause"}
+          </button>
         </header>
 
         <article className={styles.questionCard}>

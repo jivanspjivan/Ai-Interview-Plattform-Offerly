@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteSessionButton } from "@/components/delete-session-button";
+import { ReportActions } from "@/components/report-actions";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { deleteSession } from "../actions";
@@ -57,6 +58,10 @@ export default async function SessionDetailPage({
   const feedbackByAnswer = new Map(
     (feedbackData ?? []).map((feedback) => [feedback.answer_id, feedback]),
   );
+  const scored = (feedbackData ?? []).map((item) => item.overall_score);
+  const reportAverage = scored.length
+    ? Math.round(scored.reduce((sum, score) => sum + score, 0) / scored.length)
+    : null;
   const practiceQuery = new URLSearchParams({
     role: session.role,
     type: session.interview_type,
@@ -92,6 +97,7 @@ export default async function SessionDetailPage({
             className={styles.dangerButton}
             sessionId={session.id}
           />
+          <ReportActions className={styles.secondaryAction} />
         </div>
       </header>
 
@@ -113,6 +119,15 @@ export default async function SessionDetailPage({
           <dd>{formatElapsed(session.elapsed_seconds)}</dd>
         </div>
       </dl>
+
+      {reportAverage !== null && (
+        <dl className={styles.detailSummary}>
+          <div><dt>Report score</dt><dd>{reportAverage}/100</dd></div>
+          <div><dt>Answers evaluated</dt><dd>{scored.length}</dd></div>
+          <div><dt>Benchmark</dt><dd>{reportAverage >= 75 ? "Interview ready" : "Keep practicing"}</dd></div>
+          <div><dt>Priority</dt><dd>{reportAverage >= 75 ? "Consistency" : "Use the next actions"}</dd></div>
+        </dl>
+      )}
 
       {answers.length ? (
         <div className={styles.answerList}>

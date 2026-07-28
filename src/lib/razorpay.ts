@@ -62,3 +62,34 @@ export async function createRazorpaySubscription({
   }
   return data;
 }
+
+async function razorpayRequest(path: string, init?: RequestInit) {
+  const { keyId, keySecret } = getRazorpayConfig();
+  const response = await fetch(`https://api.razorpay.com/v1${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`,
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+    cache: "no-store",
+  });
+  const data = (await response.json()) as Record<string, unknown> & {
+    error?: { description?: string };
+  };
+  if (!response.ok) {
+    throw new Error(data.error?.description ?? "Razorpay request failed.");
+  }
+  return data;
+}
+
+export function getRazorpaySubscription(subscriptionId: string) {
+  return razorpayRequest(`/subscriptions/${encodeURIComponent(subscriptionId)}`);
+}
+
+export function cancelRazorpayScheduledChange(subscriptionId: string) {
+  return razorpayRequest(
+    `/subscriptions/${encodeURIComponent(subscriptionId)}/cancel_scheduled_changes`,
+    { method: "POST" },
+  );
+}

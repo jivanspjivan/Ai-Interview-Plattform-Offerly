@@ -7,6 +7,7 @@ import {
   sameOriginError,
 } from "@/lib/api-security";
 import { getTraceId, logContext, logger } from "@/lib/logger";
+import { queueEmail } from "@/lib/email";
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>;
@@ -26,11 +27,14 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   const body = parsedBody.data;
   const status = body.status;
   const elapsedSeconds = Number(body.elapsedSeconds);
+  const currentQuestion = Number(body.currentQuestion ?? 0);
 
   if (
-    (status !== "completed" && status !== "abandoned") ||
+    (status !== "completed" && status !== "abandoned" && status !== "in_progress") ||
     !Number.isInteger(elapsedSeconds) ||
-    elapsedSeconds < 0
+    elapsedSeconds < 0 ||
+    !Number.isInteger(currentQuestion) ||
+    currentQuestion < 0
   ) {
     return NextResponse.json({ error: "Invalid session update." }, { status: 400 });
   }
@@ -49,12 +53,20 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     userId: user.id,
   });
   if (rateLimitError) return rateLimitError;
+  const { data: previousSession } = await supabase
+    .from("interview_sessions")
+    .select("status")
+    .eq("id", sessionId)
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   const { data, error } = await supabase
     .from("interview_sessions")
     .update({
       status,
       elapsed_seconds: elapsedSeconds,
+      current_question: currentQuestion,
+      paused_at: status === "in_progress" ? new Date().toISOString() : null,
       completed_at: status === "completed" ? new Date().toISOString() : null,
     })
     .eq("id", sessionId)
@@ -79,6 +91,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
   if (!data) {
     return NextResponse.json({ error: "Session not found." }, { status: 404 });
+  }
+
+  if (status === "completed" && previousSession?.status !== "completed" && user.email) {
+    void queueEmail({
+      userId: user.id,
+      recipient: user.email,
+      template: "interview_completed",
+      subject: "Your Offerly interview report is ready",
+      payload: { name: user.user_metadata?.full_name ?? "there" },
+    });
   }
 
   return NextResponse.json({ saved: true });

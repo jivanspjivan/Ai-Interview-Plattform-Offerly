@@ -127,6 +127,15 @@ export async function enforceRateLimit(
         windowSeconds: options.windowSeconds,
       }),
     );
+    await admin.from("operational_events").insert({
+      severity: "warn",
+      event_key: "rate_limit.exceeded",
+      trace_id: traceId,
+      source_file: "src/lib/api-security.ts",
+      source_function: "enforceRateLimit",
+      message: `Rate limit exceeded for ${options.action}`.slice(0, 500),
+      metadata: { action: options.action, limit: options.limit },
+    });
     const retryAfter = Math.max(
       1,
       Math.ceil((new Date(result.reset_at).getTime() - Date.now()) / 1000),
