@@ -49,6 +49,21 @@ describe("API request security", () => {
     ).toBe(true);
   });
 
+  it("uses proxy-forwarded origin details on hosted deployments", () => {
+    expect(
+      validateSameOrigin(
+        new Request("http://internal-service:10000/api/auth/forgot-password", {
+          headers: {
+            origin: "https://offerly.test",
+            host: "internal-service:10000",
+            "x-forwarded-host": "offerly.test",
+            "x-forwarded-proto": "https",
+          },
+        }),
+      ),
+    ).toBe(true);
+  });
+
   it("rejects cross-site and malformed origins", () => {
     expect(
       validateSameOrigin(
