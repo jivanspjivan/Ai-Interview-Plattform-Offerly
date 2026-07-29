@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HistoryFilters } from "@/components/history-filters";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import styles from "../insights.module.css";
@@ -71,43 +72,23 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
 
   return (
     <section className={styles.section}>
-      <div className={styles.heading}>
+      <div className={`${styles.heading} ${styles.historyHeading}`}>
         <p className={styles.eyebrow}>Session history</p>
-        <h1>Every practice round, in one place.</h1>
+        <h1>Your interview history</h1>
         <span>
-          Review completed and unfinished sessions, then return to the formats
-          and roles that matter most.
+          Review your completed and unfinished mock interviews in one place.
         </span>
       </div>
 
-      <form className={styles.filters}>
-        <input
-          name="search"
-          defaultValue={search}
-          placeholder="Search by target role"
-          aria-label="Search by target role"
-        />
-        <select name="type" defaultValue={type} aria-label="Interview type">
-          <option value="">All formats</option>
-          <option value="behavioral">Behavioral</option>
-          <option value="technical">Technical</option>
-          <option value="mixed">Mixed</option>
-        </select>
-        <select name="status" defaultValue={status} aria-label="Session status">
-          <option value="">All statuses</option>
-          <option value="completed">Completed</option>
-          <option value="in_progress">In progress</option>
-          <option value="abandoned">Abandoned</option>
-        </select>
-        <select name="sort" defaultValue={sort} aria-label="Sort order">
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-        </select>
-        <button type="submit">Apply</button>
-      </form>
+      <HistoryFilters
+        initialSearch={search}
+        initialType={type}
+        initialStatus={status}
+        initialSort={sort}
+      />
 
       <div className={styles.resultMeta}>
-        <span>{total} saved {total === 1 ? "session" : "sessions"}</span>
+        <span>Sessions · {total} {total === 1 ? "result" : "results"}</span>
         {(search || type || status) && (
           <Link href="/dashboard/history">Clear filters</Link>
         )}
@@ -153,9 +134,18 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
         </div>
       ) : (
         <div className={styles.empty}>
-          <strong>No sessions match this view.</strong>
-          <p>Start a new practice round or adjust the filters above.</p>
-          <Link href="/interview/new">Start practicing →</Link>
+          <span className={styles.emptyIcon} aria-hidden="true">↺</span>
+          <strong>
+            {search || type || status
+              ? "No sessions match these filters"
+              : "No interview sessions yet"}
+          </strong>
+          <p>
+            {search || type || status
+              ? "Try clearing a filter or search for a different target role."
+              : "Complete your first mock interview and your results will appear here."}
+          </p>
+          <Link href="/interview/new">Start mock interview</Link>
         </div>
       )}
 
