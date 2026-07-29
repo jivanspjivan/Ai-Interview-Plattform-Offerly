@@ -50,16 +50,21 @@ export async function POST(request: Request) {
       },
     });
 
-    if (error || !data.properties?.action_link) {
+    if (error || !data.properties?.hashed_token) {
       // Keep account existence private: callers always receive the same response.
       return NextResponse.json(genericResponse);
     }
+
+    const recoveryUrl = new URL("/auth/callback", siteUrl);
+    recoveryUrl.searchParams.set("token_hash", data.properties.hashed_token);
+    recoveryUrl.searchParams.set("type", "recovery");
+    recoveryUrl.searchParams.set("next", "/update-password");
 
     await deliverQueuedEmail({
       recipient: email,
       subject: "Reset your Offerly password",
       template: "password_reset",
-      payload: { actionLink: data.properties.action_link },
+      payload: { actionLink: recoveryUrl.toString() },
     });
   } catch (error) {
     logger.error("Password recovery email could not be sent.", {
