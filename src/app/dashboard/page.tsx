@@ -48,49 +48,96 @@ export default async function DashboardPage() {
 
   const displayName =
     typeof user.user_metadata.full_name === "string"
-      ? user.user_metadata.full_name
+      ? user.user_metadata.full_name.trim()
       : "Candidate";
+  const firstName = displayName.split(/\s+/)[0] || "Candidate";
+  const recommendedRole = savedSessions[0]?.role ?? "Software Engineer";
 
   return (
     <>
       <section className={styles.hero}>
         <p>Your practice dashboard</p>
-        <h1>Welcome, {displayName}.</h1>
+        <h1>Welcome back, {firstName}.</h1>
         <span>
-          Build consistency with focused practice. Your saved sessions and
-          progress will collect here as the data layer comes online.
+          Practice interviews, track your progress, and improve with
+          personalized feedback.
         </span>
         <div className={styles.heroActions}>
           <Link href="/interview/new">
-            Start a practice session
-            <span aria-hidden="true">→</span>
+            <span className={styles.actionIcon} aria-hidden="true">▶</span>
+            Start mock interview
           </Link>
-          <Link href="/dashboard/account">View account</Link>
+          <Link href="/dashboard/history">View interview history</Link>
         </div>
       </section>
 
       <section className={styles.summaryGrid} aria-label="Practice summary">
-        <article className={styles.statusCard}>
-          <span>Account status</span>
-          <strong>Ready to practice</strong>
-          <p>Your secure Offerly account is active.</p>
+        <article className={styles.recommendedCard}>
+          <span className={styles.metricIcon} aria-hidden="true">▶</span>
+          <div>
+            <span>Next recommended practice</span>
+            <strong>{recommendedRole}</strong>
+            <p>15 questions · Around 20 minutes</p>
+          </div>
+          <Link href="/interview/new" aria-label={`Start a ${recommendedRole} interview`}>
+            Start
+          </Link>
         </article>
         <article className={styles.metricCard}>
-          <span>Sessions completed</span>
-          <strong>{completedSessions.length}</strong>
-          <p>
-            {completedSessions.length
-              ? "Completed sessions saved to your account."
-              : "Your first completed practice will appear here."}
-          </p>
+          <span className={styles.metricIcon} aria-hidden="true">✓</span>
+          <div>
+            <span>Sessions completed</span>
+            <strong>{completedSessions.length}</strong>
+            <p>
+              {completedSessions.length
+                ? "Completed mock interviews."
+                : "Complete your first mock interview."}
+            </p>
+          </div>
         </article>
         <article className={styles.metricCard}>
-          <span>Current practice streak</span>
-          <strong>
-            {streak} {streak === 1 ? "day" : "days"}
-          </strong>
-          <p>Start a session to begin building consistency.</p>
+          <span className={styles.metricIcon} aria-hidden="true">↗</span>
+          <div>
+            <span>Current practice streak</span>
+            <strong>
+              {streak} {streak === 1 ? "day" : "days"}
+            </strong>
+            <p>Practice today to build consistency.</p>
+          </div>
         </article>
+      </section>
+
+      <section className={styles.quickStart}>
+        <div className={styles.sectionHeading}>
+          <div>
+            <p>Quick start</p>
+            <h2>Choose your interview</h2>
+          </div>
+          <Link href="/interview/new">Customize a session →</Link>
+        </div>
+        <div className={styles.practiceModes}>
+          <article>
+            <span aria-hidden="true">⌘</span>
+            <h3>Technical interview</h3>
+            <p>Role-specific problem solving and technical communication.</p>
+            <div><span>20 min</span><span>Focused</span></div>
+            <Link href="/interview/new">Start interview →</Link>
+          </article>
+          <article>
+            <span aria-hidden="true">✦</span>
+            <h3>Behavioral interview</h3>
+            <p>Practice clear STAR stories around real workplace situations.</p>
+            <div><span>15 min</span><span>All levels</span></div>
+            <Link href="/interview/new">Start interview →</Link>
+          </article>
+          <article>
+            <span aria-hidden="true">◫</span>
+            <h3>Mixed interview</h3>
+            <p>Prepare for a balanced round with technical and people skills.</p>
+            <div><span>25 min</span><span>Balanced</span></div>
+            <Link href="/interview/new">Start interview →</Link>
+          </article>
+        </div>
       </section>
 
       <section className={styles.dashboardPanels}>
@@ -127,10 +174,10 @@ export default async function DashboardPage() {
           ) : (
             <>
               <p>
-                Complete an interview to see its role, scores, transcript, and
-                coaching summary in this space.
+                Complete your first mock interview to see feedback, scores, and
+                coaching insights.
               </p>
-              <Link href="/interview/new">Start your first session →</Link>
+              <Link href="/interview/new">Start interview →</Link>
             </>
           )}
         </article>
@@ -146,10 +193,10 @@ export default async function DashboardPage() {
           {averageScore === null ? (
             <>
               <p>
-                Generate feedback on saved answers to start measuring
-                structure, relevance, clarity, and evidence over time.
+                Complete your first mock interview to start measuring clarity,
+                relevance, structure, and progress over time.
               </p>
-              <span className={styles.pendingLabel}>No feedback saved yet</span>
+              <Link href="/interview/new">Start interview →</Link>
             </>
           ) : (
             <>
